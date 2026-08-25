@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+
+        * {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        div {
+            gap: 10px;
+            display: flex;
+            flex-direction: column;
+            background-color: aqua;
+            position: relative;
+            align-items: center;
+            justify-content: center;
+        }
+
+        div:not(.griddiv) {
+            padding: 10px;
+            border: 1px solid;
+            border-radius: 8px;
+        }
+
+        .griddiv {
+            display: grid;
+            grid-template-columns: auto auto auto;
+            box-sizing: border-box;
+        }
+
+        .griddiv .hexsquare {
+            height: 100px;
+            width: 100px;
+        }
+
+        button {
+            border: 1px solid black;
+            border-radius: 6px;
+        }
+
+        .hexsquare {
+            border: 1px solid black;
+            border-radius: 6px;
+            background-color: white;
+        }
+
+        .uibutton {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            border-radius: 100%;
+            position: absolute;
+        }
+
+        #turndiv {
+            width: 100%;
+            height: 50px;
+            box-sizing: border-box;
+        }
+
+        #resetdiv {
+            width: 100px;
+            height: 50px;
+            background-color: red;
+        }
+
+        .piece {
+            height: 50px;
+            width: 50px;
+            align-items: start;
+            justify-content: start;
+        }
+    </style>
+</head>
+<body>
+    <h1>Hexapawn</h1>
+    <svg style="display:none;" id="pawn" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+        width="800px" height="800px" viewBox="0 0 100 100" enable-background="new 0 0 100 100" xml:space="preserve">
+        <g>
+            <g>
+                <path fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" d="M73,89c0,2.2-1.8,4-4,4H31c-2.2,0-4-1.8-4-4l0,0
+                    c0-2.2,1.8-4,4-4h38C71.2,85,73,86.8,73,89L73,89z"/>
+            </g>
+            <circle fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" cx="50" cy="22" r="13"/>
+            <g>
+                <path fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" d="M63,38c0,1.65-1.35,3-3,3H40c-1.65,0-3-1.35-3-3
+                    l0,0c0-1.65,1.35-3,3-3h20C61.65,35,63,36.35,63,38L63,38z"/>
+            </g>
+            <g>
+                <path fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" d="M68,82c0,1.65-1.35,3-3,3H35c-1.65,0-3-1.35-3-3
+                    l0,0c0-1.65,1.35-3,3-3h30C66.65,79,68,80.35,68,82L68,82z"/>
+            </g>
+            <path fill="none" stroke="#000000" stroke-width="4" stroke-miterlimit="10" d="M63.99,79C62.052,74.959,58,74.478,58,41H42
+                c0,33.478-4.052,33.959-5.99,38H63.99z"/>
+        </g>
+    </svg>
+    <div>
+        <div class="griddiv" id="griddiv"></div>
+        <div id="turndiv">White</div>
+    </div>
+    <div id="resetdiv">Reset</div>
+<script>
+let turn = 0;
+let turndiv = document.getElementById("turndiv");
+let resetdiv = document.getElementById("resetdiv")
+let grid = document.getElementById("griddiv");
+
+function resetBoard() {
+    grid.innerHTML = "";
+    for (let i = 1; i < 10; i++) {
+        let square = document.createElement("div");
+        square.id = "hex" + i;
+        square.classList.add("hexsquare")
+        grid.appendChild(square);
+        if (i > 3 && i < 7) {continue};
+        let piece = document.createElement("div");
+        let text = (i < 4) ? "Black" : "White";
+        let backgroundColor = (i < 4) ? "#000000" : "#FFFFFF";
+        let color = (i < 4) ? "#FFFFFF" : "#000000";
+        piece.classList.add((i < 4) ? "BlackPiece" : "WhitePiece", "piece");
+        piece.innerHTML = ((i-1) % 3 + 1);
+        piece.style.backgroundColor = backgroundColor;
+        piece.style.color = color;
+        piece.id = "piece" + i;
+        let pawn = document.getElementById("pawn").cloneNode(true);
+        pawn.removeAttribute("id");
+        pawn.style.display = "block";
+        pawn.style.position = "absolute";
+        pawn.style.width = "50px";
+        pawn.style.height = "50px";
+        if (i < 4) {pawn.style.filter = "invert(1)"};
+        piece.appendChild(pawn);
+        piece.addEventListener("click", () => selectPiece(i));
+        square.appendChild(piece);
+    }
+    turn = 0;
+    turndiv.innerHTML = "White"
+    turndiv.style.backgroundColor = "#FFFFFF"
+    turndiv.style.color = "#000000"
+}
+
+resetBoard();
+
+function movesOfPiece(n) {
+
+    let piece = document.getElementById("piece" + n);
+    let square = piece.parentElement;
+    let squaren = parseInt(square.id.replace(/[^0-9]/g, ""));
+    let takecheck = piece.classList.contains("WhitePiece") ? [-4,-2] : [2,4];
+    let currentTeam = piece.classList[0];
+    let moveset = [];
+    if (squaren % 3 == 0) {takecheck[1] = 0};
+    if (squaren % 3 == 1) {takecheck[0] = 0};
+    
+    let takeresults = [false,false]
+    for (let i = 0; i < 2; i++) {
+        if (takecheck[i] == 0) {continue};
+        let checkpiece = document.getElementById("hex" + (squaren + takecheck[i])).querySelector(":scope > :not(.uibutton)");
+        if (checkpiece && !checkpiece.classList.contains(currentTeam)) {takeresults[i] = true};
+    }
+
+    let newsquareid = piece.classList.contains("WhitePiece") ? -3 : 3;
+
+    if (takeresults[0] == true) {
+        moveset.push(squaren + takecheck[0]);
+    }
+
+    if (takeresults[1] == true) {
+        moveset.push(squaren + takecheck[1]);
+    }
+
+    let newsquare = document.getElementById("hex" + (squaren + newsquareid) );
+    let newsquarepiece = newsquare.querySelector(":scope > :not(.uibutton)")
+
+    if (!newsquarepiece) {moveset.push(squaren + newsquareid)};
+
+    return moveset;
+}
+
+function selectPiece(n) {
+
+    let piece = document.getElementById("piece" + n);
+    document.querySelectorAll(".uibutton").forEach(button => {
+        button.parentElement.removeChild(button);
+    });
+
+    let canMove = false;
+    if (turn === 0 && piece.classList.contains("WhitePiece") ) {canMove = true};
+    if (turn === 1 && piece.classList.contains("BlackPiece") ) {canMove = true};
+    if (!canMove) {return};
+    
+    let moveset = movesOfPiece(n);
+
+    moveset.forEach((move) => {
+        let movebutton = document.createElement("button");
+        let buttonsquare = document.getElementById("hex" + move );
+        let bspiece = buttonsquare.querySelector(":not(.uibutton)");
+        if (bspiece && bspiece.classList.contains(piece.classList[0])) {return};
+        movebutton.classList.add("uibutton");
+        movebutton.addEventListener("click", () => movePiece(n, move, 1));
+        buttonsquare.appendChild(movebutton);
+    });
+}
+
+function movePiece(n, newsquareid, type) {
+    document.querySelectorAll(".uibutton").forEach(button => {
+        button.parentElement.removeChild(button);
+    });
+    let piece = document.getElementById("piece" + n);
+    turn = (turn + 1) % 2;
+    turndiv.innerHTML = (turn == 1 ? "Black" : "White");
+    turndiv.style.backgroundColor = (turn == 1 ? "#000000" : "#FFFFFF");
+    turndiv.style.color = (turn == 1 ? "#FFFFFF" : "#000000");
+    let newsquare = document.getElementById("hex" + newsquareid);
+    let newsquarepiece = newsquare.querySelector(":not(.uibutton)");
+
+    if (newsquarepiece) {
+        if (type) {
+            newsquare.removeChild(newsquarepiece);
+        } else {
+            return;
+        }
+    };
+
+    piece.parentElement.removeChild(piece);
+    newsquare.appendChild(piece);
+    
+    let currentTeam = piece.classList.contains("WhitePiece") ? "White" : "Black";
+    if ( (piece.classList.contains("WhitePiece") && newsquareid < 4) || (piece.classList.contains("BlackPiece") && newsquareid > 6) ) {
+        onWin(currentTeam)
+        return;
+    }
+
+    if (document.querySelector(".WhitePiece") == null || document.querySelector(".BlackPiece") == null) {
+        onWin(currentTeam);
+        return;
+    }
+
+    let oppositeTeamClass = "." + ( piece.classList.contains("WhitePiece") ? "BlackPiece" : "WhitePiece" );
+    let piecemoveposs = [];
+    document.querySelectorAll(oppositeTeamClass).forEach((apiece) => {
+        let pieceid = parseInt(apiece.id.replace(/[^0-9]/g, ""));
+        if (movesOfPiece(pieceid).length == 0) {
+            piecemoveposs.push(false);
+            return;
+        }
+        piecemoveposs.push(true);
+    });
+    
+    if (!piecemoveposs.includes(true)) {
+        onWin(currentTeam);
+    }
+
+}
+
+function onWin(color) {
+    turndiv.innerHTML = color + " Wins!";
+    turndiv.style.backgroundColor = (color == "White" ? "#FFFFFF" : "#000000");
+    turndiv.style.color = (color == "White" ? "#000000" : "#FFFFFF");
+}
+
+resetdiv.addEventListener("click", () => resetBoard());
+
+window.onerror = function(message, source, line, column, error) {
+    alert(
+        "Error: " + message +
+        "\nLine: " + line +
+        "\nColumn: " + column
+    );
+};
+</script>
+</body>
+</html>
