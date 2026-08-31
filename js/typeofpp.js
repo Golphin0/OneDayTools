@@ -96,3 +96,5 @@ function type(obj, outputType) {
     }
     
 }
+
+window.type = type;
