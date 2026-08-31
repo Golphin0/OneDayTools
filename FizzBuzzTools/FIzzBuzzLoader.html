@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<style>
+    body {
+        background:linear-gradient(135deg,#070,#2FF,#FF0,#0F0,#276,#F75,#4F6,#FF6,#F00,#070,#2FF);
+        background-size:1000% 1000%;
+        padding:20px;
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+        align-items:center;
+        justify-content:center;
+        height:100vh;
+        animation: back 48s linear infinite;
+    }
+    
+    textarea {
+        width:100%;
+        border-radius:10px;
+        padding:10px;
+        border: solid 3px;
+    }
+    
+    div {
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        gap:10px;
+        justify-content:center;
+        padding:10px;
+    }
+    
+    .inputdiv {
+        height:100%;
+        width:100%;
+    }
+    
+    .maindiv {
+        height:100%;
+        width:100%;
+        flex-direction:row;
+    }
+    
+    #input {
+        height:60%;
+    }
+    
+    #output {
+        height:70%;
+    }
+    
+    button {
+        width:100%;
+        border-radius:10px;
+        padding:10px;
+        background-color:#4F3;
+        border: solid 3px;
+    }
+    
+    .title {
+        font-family:sans-serif;
+    }
+    
+    .subtitle {
+        font-family:sans-serif;
+    }
+    
+    .titlediv {
+        height:5%;
+        display:flex;
+        flex-direction:row;
+    }
+    
+    @keyframes back {
+      0%   {background-position:0% 0%;}
+      100% {background-position:100% 100%;}
+    }
+</style>
+<body>
+
+<div class="titlediv">
+<h1 class="title">FizzBuzzLoader</h1>
+<h2 class="subtitle">v1.0 Alpha</h2>
+</div>
+
+<div class="maindiv">
+
+<textarea id="output">Welcome to FizzBuzzLoader! Please enter a valid json string and click "Run."</textarea>
+
+<div class="inputdiv">
+    <textarea id="input"></textarea>
+    <button id="run">Run</button>
+</div>
+
+</div>
+
+<script>
+    
+const input = document.getElementById("input");
+const output = document.getElementById("output");
+const run = document.getElementById("run");
+
+function isPrime(number) {
+    number = Math.round(Number(number));
+    if (isNaN(number)) {return false};
+    if (number > 10000 || number < 2) {return false};
+    let upTo = Math.floor(Math.sqrt(number));
+    for (let i=2;i<=upTo;i++) {
+        if (number % i == 0) {return false}
+    }
+    
+    return true;
+}
+
+function isPerfectSquare(number) {
+    number = Math.round(Number(number));
+    if (isNaN(number)) {return false};
+    return Math.round(Math.sqrt(number)) == Math.sqrt(number);
+}
+
+function download(text, name) {
+    const blob = new Blob([text], { type: "text/plain" });
+
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = name + ".txt";
+    a.click();
+
+    URL.revokeObjectURL(a.href);
+}
+
+function FizzBuzz() {
+    
+    try {
+
+        const json = JSON.parse(input.value);
+        output.textContent = "";
+        
+        function calculate(curi,string) {
+            return new Function(`i = ${curi}; function isPrime(number){number=Math.round(Number(number));if(isNaN(number)){return false};if(number>10000||number<2){return false};let upTo=Math.floor(Math.sqrt(number));for(let i=2;i<=upTo;i++){if(number%i==0){return false}}return true;}; isPerfectSquare=n=>typeof n=="number"&&n>=0&&Number.isInteger(Math.sqrt(n)); return (${string})`)();
+        }
+
+
+        const values =
+            json.find(item => item.name == "values")?.values;
+        const defaults =
+            json.find(item => item.name == "defaults")?.values;
+        const outputs =
+            json.find(item => item.name == "output")?.values;
+
+        if (!values || !defaults) {
+            throw new Error("Missing Values or Defaults section");
+        }
+        if (!defaults.countBy) {
+            throw new Error("CountBy cannot be 0");
+        }
+
+        let iteration = 0;
+        
+
+
+
+        let result = "";
+
+
+        for (let i = defaults.start;i <= defaults.countTo;i += defaults.countBy) {
+            iteration++;
+            let current = "";
+            if ( (iteration > 10000) || ( (defaults.countTo / defaults.countBy) > 10000)) {
+                
+                throw new Error("Count exceeds 10000.");
+                break;
+            }
+            
+
+            for (const entry of values) {
+                type = entry.type;
+                if (!type) { type = "modI" }
+                if (type == "modI") {
+                    if (i % entry.value == 0) {
+                        current += entry.text;
+                    }
+                } else if (type == "prime") {
+                    check = calculate(i,entry.value);
+                    if (isPrime(check)) {
+                        current += entry.text;
+                    }
+                } else if (type == "perfectSquare") {
+                    check = calculate(i,entry.value);
+                    if (isPerfectSquare(check)) {
+                        current += entry.text;
+                    }
+                } else if (type == "else") {
+                    if (current === "") {
+                        current += entry.text;
+                    }
+                } else if (type == "custom") {
+                    if (!!calculate(i,entry.value)) {
+                        current += entry.text;
+                    }
+                }
+
+            }
+
+
+            if (current === "") {
+                current = i;
+            }
+
+
+            result += current + "\n";
+        }
+
+
+        if (outputs?.includes("@CONSOLE")) {
+            output.textContent = result;
+        }
+
+
+        if (outputs?.includes("@ASK")) {
+            download(result,"FizzBuzzOutput");
+            output.textContent += "aaaa"
+        }
+        
+
+
+    } catch(e) {
+
+        output.textContent =
+            "Invalid JSON or settings:\n" + e.message;
+
+    }
+
+}
+
+
+run.addEventListener("click", FizzBuzz);
+
+</script>
+
+</body>
+</html>

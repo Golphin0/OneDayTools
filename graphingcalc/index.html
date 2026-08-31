@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #canvas {
+            width:600px;
+            height: 400px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+            align-items:center;
+            justify-content:center;
+            height: 100vh;
+            width: 100%;
+            box-sizing: border-box;
+            font-family: sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <textarea name="s" id="formula">x</textarea>
+    <button id="formulaButton">button</button>
+</body>
+</html>
+
+<script>
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+
+    function sleep(ms) { return new Promise(function(resolve) { setTimeout(resolve, ms); }); }
+
+    canvas.style.border = "solid 1px black"
+
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    let drawing = 0;
+
+    async function draw(form) {
+        const thisDrawing = ++drawing;
+
+        ctx.resetTransform();
+        clearCanvas();
+
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.lineWidth = 1;
+
+        let x = -canvas.width / 2;
+
+        while (x < canvas.width / 2) {
+            // Stop if a newer drawing started
+            if (thisDrawing !== drawing) return;
+
+            let y = eval(form);
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+
+            x++;
+
+            y = eval(form);
+            ctx.lineTo(x, y);
+
+            ctx.stroke();
+
+            await sleep(1);
+        }
+    }
+
+    let formula = document.getElementById("formula");
+    let button = document.getElementById("formulaButton");
+
+    button.addEventListener("click", () => {
+        clearCanvas();
+        draw(formula.value);
+    });
+</script>

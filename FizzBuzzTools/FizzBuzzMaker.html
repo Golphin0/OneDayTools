@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html>
+<style>
+    body {
+        background:linear-gradient(135deg,#070,#2FF,#FF0,#0F0,#276,#F75,#4F6,#FF6,#F00,#070,#2FF);
+        background-size:1000% 1000%;
+        padding:20px;
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+        align-items:center;
+        justify-content:center;
+        height:100vh;
+        animation: back 48s linear infinite;
+        font-family: sans-serif;
+    }
+    
+    textarea {
+        width:100%;
+        border-radius:10px;
+        padding:10px;
+        border: solid 3px;
+    }
+    
+    div {
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        gap:10px;
+        justify-content:center;
+        padding:10px;
+    }
+    
+    .inputdiv {
+        height:100%;
+        width:100%;
+    }
+    
+    .maindiv {
+        height:100%;
+        width:100%;
+        flex-direction:row;
+    }
+    
+    #input {
+        height:60%;
+    }
+    
+    #output {
+        height:70%;
+    }
+    
+    button {
+        width:100%;
+        border-radius:10px;
+        padding:10px;
+        background-color:#4F3;
+        border: solid 3px;
+    }
+    
+    .titlediv {
+        height:5%;
+        display:flex;
+        flex-direction:row;
+    }
+    
+    .fizzdiv {
+        width:100%;
+        height:600px;
+        border-radius:10px;
+        background-color:#FFF;
+        border: solid 3px;
+        flex-direction:column;
+        padding:25px 15px;
+        gap:25px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        justify-content:flex-start;
+        box-sizing: border-box;
+    }
+    
+    .newdiv {
+        width:100%;
+        height:100%;
+        flex-direction:column;
+    }
+    
+    .fizzbuzzentry {
+        width:80%;
+        border-radius:10px;
+        padding:10px;
+        background:linear-gradient(45deg,#AF0,#7F6);
+        border: solid 3px;
+        display:flex;
+        flex-direction:column;
+        position:relative;
+    }
+    
+    .fizzbuzzoptions {
+        width:100%;
+        border-radius:10px;
+        padding:10px;
+        background:#FFF;
+        border: solid 3px;
+        display:flex;
+        flex-direction:column;
+        position:relative;
+    }
+    
+    .fbetext {
+        width:90%;
+        border-radius:10px;
+        padding:10px;
+        background-color:#FFF;
+        border: solid 3px;
+        display:flex;
+        flex-direction:column;
+    }
+    
+    .fbedelete {
+        width:10px;
+        height:10px;
+        border-radius:100%;
+        padding:10px;
+        background-color:#F22;
+        border:solid 3px;
+        display:flex;
+        flex-direction:column;
+        position:absolute;
+        top:-20px;
+        left:-20px;
+    }
+    
+    .fbeshift {
+        width:10px;
+        height:10px;
+        border-radius:100%;
+        padding:10px;
+        background-color:#00F;
+        border:solid 3px;
+        display:flex;
+        flex-direction:column;
+        position:absolute;
+        top:-20px;
+        left:calc(100% - 20px);
+    }
+    
+    .fbecon {
+        width:90%;
+        height:100%;
+        border-radius:10px;
+        padding:10px;
+        background-color:#F00;
+        border: solid 3px;
+        flex-direction:row;
+    }
+    
+    
+    
+    @keyframes back {
+      0%   {background-position:0% 0%;}
+      100% {background-position:100% 100%;}
+    }
+</style>
+<body>
+
+<div class="titlediv">
+<h1 class="title">FizzBuzzMaker</h1>
+<h2 class="subtitle">v1.0 Alpha</h2>
+</div>
+
+<div class="maindiv">
+
+<div class="newdiv">
+    <div class="fizzdiv" id="fizzdiv">
+    </div>
+    <button id="newFizz">New FizzBuzz</button>
+</div>
+
+<div class="inputdiv">
+    <div class="fizzbuzzoptions">
+        <div id="countTo" class="fbetext">100</div>
+        <div id="countBy" class="fbetext">1</div>
+        <div id="start" class="fbetext">1</div>
+    </div>
+    <textarea id="input"></textarea>
+    <button id="run">Compile</button>
+</div>
+
+</div>
+
+<script>
+    
+const input = document.getElementById("input");
+const output = document.getElementById("output");
+const run = document.getElementById("run");
+const newFizz = document.getElementById("newFizz");
+const cycleOptions = document.getElementById("cycleOptions");
+
+const countTo = document.getElementById("countTo");
+const countBy = document.getElementById("countBy");
+const start = document.getElementById("start");
+
+let JSONValues = {
+    "name": "values",
+    "values": [
+    ]
+};
+let JSONDefaults = {
+    "name": "defaults",
+    "values": {
+      "countTo": 100,
+      "countBy": 1,
+      "start": 1
+    }
+}
+let JSONOutputs = {
+    "name": "output",
+    "values": [
+      "@CONSOLE"
+    ]
+}
+let finalJSON = [];
+
+let currentCount = 0;
+
+function changeButton(id1,id2) {
+    let button = document.getElementById("button" + id1);
+    let div = button.querySelector(id2);
+    let newText = prompt("Please Enter the New Value:");
+    if (!newText) {return};
+    if (!(isNaN(Number(newText)))) {
+        newText = Number(newText);
+    }
+    let cleanid = id2.replace(".id-", "").trim();
+    JSONValues.values.find(x => x.id == id1)[cleanid] = newText;
+    input.value = JSON.stringify(JSONValues, null, 1);
+    div.textContent = newText;
+}
+
+function changeOptions(id) {
+    let div = document.getElementById(id);
+    let newText = prompt("Please Enter the New Value:");
+    if (!newText) {return};
+    newText = Number(newText);
+    if (isNaN(newText)) {return};
+    div.textContent = newText;
+    JSONDefaults.values[id] = newText; 
+    input.value = JSON.stringify(JSONDefaults, null, 1);
+}
+
+function deleteButton(id) {
+    let button = document.getElementById("button" + id);
+    button.remove();
+
+    let index = JSONValues.values.findIndex(x => x.id == id);
+
+    if (index !== -1) {
+        JSONValues.values.splice(index, 1);
+    }
+
+    input.value = JSON.stringify(JSONValues, null, 1);
+}
+
+function shiftUp(id) {
+    let button = document.getElementById("button" + id);
+    let parent = button.parentElement;
+
+    let index = JSONValues.values.findIndex(x => x.id == id);
+
+    if (index > 0) {
+        let orig = JSONValues.values.splice(index, 1);
+        JSONValues.values.splice(index - 1, 0, orig[0]);
+
+        parent.insertBefore(button, parent.children[index - 1]);
+    }
+
+    input.value = JSON.stringify(JSONValues, null, 1);
+}
+
+function removeIds(obj) {
+    if (Array.isArray(obj)) {
+        return obj.map(removeIds);
+    }
+
+    if (obj && typeof obj === "object") {
+        let newObj = {};
+
+        for (let key in obj) {
+            if (key !== "id") {
+                newObj[key] = removeIds(obj[key]);
+            }
+        }
+
+        return newObj;
+    }
+
+    return obj;
+}
+
+
+
+newFizz.addEventListener("click", () => {
+    const button = document.createElement("div");
+    button.className = "fizzbuzzentry";
+    
+    const fbecon = document.createElement("div");
+    fbecon.classList.add("fbecon");
+    const text = document.createElement("div");
+    text.classList.add("fbetext", "id-text");
+    text.textContent = "Fizz";
+    const type = document.createElement("div");
+    type.classList.add("fbetext", "id-type");
+    type.textContent = "modI";
+    const value = document.createElement("div");
+    value.classList.add("fbetext", "id-value");
+    value.textContent = "3";
+    const removeButton = document.createElement("div");
+    removeButton.classList.add("fbedelete");
+    removeButton.textContent = "X";
+    const shiftButton = document.createElement("div");
+    shiftButton.classList.add("fbeshift");
+    shiftButton.textContent = "^";
+    
+    fbecon.appendChild(text);
+    fbecon.appendChild(type);
+    button.appendChild(fbecon);
+    button.appendChild(value);
+    button.appendChild(removeButton);
+    button.appendChild(shiftButton);
+    
+    
+    
+    currentCount++;
+    button.id = "button" + currentCount;
+    const currentId = currentCount;
+    text.addEventListener("click", () => changeButton(currentId, ".id-text"));
+    type.addEventListener("click", () => changeButton(currentId, ".id-type"));
+    value.addEventListener("click", () => changeButton(currentId, ".id-value"));
+    removeButton.addEventListener("click", () => deleteButton(currentId));
+    shiftButton.addEventListener("click", () => shiftUp(currentId));
+    fizzdiv.appendChild(button);
+    let newJson = {"text":"Fizz","type":"modI","value":3,"id":currentCount};
+    // json.find(x => x.name === "values").values.push(newJson);
+    JSONValues.values.push(newJson);
+    input.value = JSON.stringify(JSONValues, null, 1);
+});
+
+run.addEventListener("click", () => {
+    finalJSON = [];
+    finalJSON.push(JSONValues, JSONDefaults, JSONOutputs);
+    let final = removeIds(finalJSON);
+    input.value = JSON.stringify(final, null, 1);
+});
+
+countTo.addEventListener("click", () => changeOptions("countTo"));
+countBy.addEventListener("click", () => changeOptions("countBy"));
+start.addEventListener("click", () => changeOptions("start"));
+
+</script>
+
+</body>
+</html>

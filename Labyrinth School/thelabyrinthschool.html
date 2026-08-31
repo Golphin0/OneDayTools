@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<style>
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        padding: 20px;
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+        align-items:center;
+        justify-content:center;
+        height: 100vh;
+        width: 100%;
+        box-sizing: border-box;
+        font-family: sans-serif;
+        position: relative;
+    }
+
+    .bodymenu {
+        background:linear-gradient(135deg,#070,#2FF,#FF0,#0F0,#276,#F75,#4F6,#FF6,#F00,#070,#2FF);
+        animation: back 48s linear infinite;
+        background-size:1000% 1000%;
+    }
+    
+    @keyframes back {
+      0%   {background-position:0% 0%;}
+      100% {background-position:100% 100%;}
+    }
+    
+    div {
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        gap:10px;
+        padding: 10px;
+        box-sizing: border-box;
+        justify-content:center;
+    }
+
+    .audiocontrols {
+        flex-direction: row;
+        justify-content: flex-start;
+        border: solid 1px black;
+        border-radius: 15px;
+        height:100px;
+        width:300px;
+        background-color: #707070;
+    }
+
+    #menucontainer {
+        display: contents;
+    }
+    
+    .maindiv {
+        height:100%;
+        width:100%;
+        flex-direction:row;
+    }
+    
+    button {
+        width:100%;
+        border-radius:10px;
+        padding:10px;
+        background-color:#4F3;
+        border: solid 3px;
+    }
+
+    .audiocontrols button {
+        background-color:#4F3;
+    }
+
+    .acpp {
+        width: 60px;
+        height: 60px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #startButton {
+        width: 50%;
+        height: 10%;
+    }
+    
+    .titlediv {
+        height:5%;
+        display:flex;
+        flex-direction:row;
+    }
+
+    #transitionDark {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-color: #000000;
+        opacity: 100%;
+        transition: all;
+        transition-duration: 1.5s;
+        pointer-events: auto;
+        z-index: 1;
+    }
+
+    #preScreen {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: url("me.png");
+        background-repeat: no-repeat;
+        background-size: 100% 100%;
+        opacity: 100%;
+        transition: all;
+        transition-duration: 1.5s;
+        pointer-events: none;
+        z-index: 2;
+    }
+    
+</style>
+<body class="bodymenu">
+
+<div id="transitionDark"></div>
+<div id="preScreen"></div>
+
+<div id="menucontainer">
+    <div class="titlediv">
+    <h1 class="title">School Labyrinth</h1>
+    </div>
+    <audio loop id="startMusic" src="33cbtc.m4a"></audio>
+    <div class="audiocontrols">
+        <button class="acpp" id="startMusicPlay">||</button>
+    </div>
+    <div class="maindiv">
+
+    <button id="startButton">New Game</button>
+
+
+    </div>
+</div>
+
+<script src="main.js"></script>
+
+</body>
+</html>
