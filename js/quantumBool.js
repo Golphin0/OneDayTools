@@ -51,3 +51,5 @@ class QuantumBool {
         this.fpercent = 1 - this.tpercent
     }
 }
+
+window.QuantumBool = QuantumBool;
