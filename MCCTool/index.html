@@ -6,179 +6,201 @@
   <title>MCC Tool</title>
   <style>
     :root {
-      color-scheme: dark;
-      --bg: #0b100d;
-      --surface: #141d17;
-      --surface-raised: #1b2820;
-      --surface-soft: #101811;
-      --line: #2c3b31;
-      --line-strong: #435747;
-      --text: #edf5ee;
-      --muted: #a8b6aa;
-      --accent: #8bd450;
-      --accent-strong: #b2f078;
-      --accent-ink: #13200e;
-      --danger: #ff8e80;
-      --shadow: 0 18px 46px rgba(0, 0, 0, .24);
-    }
+  color-scheme: dark;
+  --bg: #0b100d;
+  --surface: #141d17;
+  --surface-raised: #1b2820;
+  --surface-soft: #101811;
+  --line: #2c3b31;
+  --line-strong: #435747;
+  --text: #edf5ee;
+  --muted: #a8b6aa;
+  --accent: #8bd450;
+  --accent-strong: #b2f078;
+  --accent-ink: #13200e;
+  --danger: #ff8e80;
+  --shadow: 0 18px 46px rgba(0, 0, 0, .24);
+}
 
-    * { box-sizing: border-box; }
+* { box-sizing: border-box; }
 
-    html { min-width: 320px; background: var(--bg); }
+html { min-width: 320px; background: var(--bg); }
 
-    body {
-      max-width: 1120px;
-      min-height: 100vh;
-      margin: 0 auto;
-      padding: clamp(20px, 4vw, 54px) clamp(14px, 4vw, 42px);
-      color: var(--text);
-      background:
-        radial-gradient(circle at 82% 0%, rgba(92, 146, 70, .13), transparent 32rem),
-        var(--bg);
-      font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    }
+body {
+  max-width: 1120px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: clamp(20px, 4vw, 54px) clamp(14px, 4vw, 42px);
+  color: var(--text);
+  background:
+    radial-gradient(circle at 82% 0%, rgba(92, 146, 70, .13), transparent 32rem),
+    var(--bg);
+  font: 15px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
 
-    h2, h3 { margin: 0; letter-spacing: -.025em; }
-    h2 { font-size: clamp(1.45rem, 3vw, 2rem); }
-    h3 { font-size: 1.04rem; }
+h2, h3 { margin: 0; letter-spacing: -.025em; }
+h2 { font-size: clamp(1.45rem, 3vw, 2rem); }
+h3 { font-size: 1.04rem; }
 
-    body > h2 { margin: 0 0 18px; }
+body > h2 { margin: 0 0 18px; }
 
-    button, input, select, textarea { font: inherit; }
+button, input, select, textarea { font: inherit; }
 
-    button {
-      min-height: 40px;
-      border: 1px solid var(--line-strong);
-      border-radius: 8px;
-      padding: 8px 13px;
-      color: var(--text);
-      background: linear-gradient(180deg, #243329, #1a261e);
-      cursor: pointer;
-      transition: border-color .16s ease, background .16s ease, color .16s ease, transform .16s ease;
-    }
+button {
+  min-height: 40px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  padding: 8px 13px;
+  color: var(--text);
+  background: linear-gradient(180deg, #243329, #1a261e);
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease, color .16s ease, transform .16s ease;
+}
 
-    button:hover { border-color: var(--accent); background: #2b3d2e; }
-    button:active { transform: translateY(1px); }
-    button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
-      outline: 2px solid var(--accent-strong);
-      outline-offset: 2px;
-    }
+button:hover { border-color: var(--accent); background: #2b3d2e; }
+button:active { transform: translateY(1px); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
 
-    .tabs, .toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
+.tabs, .toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
-    .tabs { margin-bottom: 14px; }
-    .tabs button { color: var(--muted); background: transparent; }
-    .tabs button.active { color: var(--accent-ink); border-color: var(--accent); background: var(--accent); }
+.tabs { margin-bottom: 14px; }
+.tabs button { color: var(--muted); background: transparent; }
+.tabs button.active { color: var(--accent-ink); border-color: var(--accent); background: var(--accent); }
 
-    #builder, #escape, #minecart {
-      padding: clamp(17px, 3vw, 27px);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: linear-gradient(145deg, rgba(28, 42, 32, .96), rgba(16, 24, 18, .98));
-      box-shadow: var(--shadow);
-    }
+#builder, #escape, #minecart {
+  padding: clamp(17px, 3vw, 27px);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(145deg, rgba(28, 42, 32, .96), rgba(16, 24, 18, .98));
+  box-shadow: var(--shadow);
+}
 
-    #builder h3, #escape h3, #minecart h3 { margin-bottom: 20px; }
+#builder h3, #escape h3, #minecart h3 { margin-bottom: 20px; }
 
-    .coordinates {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-    }
+.coordinates {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
 
-    .coordinate {
-      display: grid;
-      grid-template-columns: auto 1fr;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-    }
+.coordinate {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
 
-    input, select, textarea {
-      width: 100%;
-      border: 1px solid var(--line);
-      border-radius: 7px;
-      color: var(--text);
-      background: var(--surface-soft);
-    }
+input, select, textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--text);
+  background: var(--surface-soft);
+}
 
-    input, select { min-height: 40px; padding: 7px 10px; }
-    textarea { display: block; min-height: 150px; padding: 12px; resize: vertical; }
-    textarea, .command-input { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-    input::placeholder, textarea::placeholder { color: #718174; }
+input, select { min-height: 40px; padding: 7px 10px; }
+textarea { display: block; min-height: 150px; padding: 12px; resize: vertical; }
+textarea, .command-input { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+input::placeholder, textarea::placeholder { color: #718174; }
+input:disabled { opacity: .55; cursor: not-allowed; }
 
-    hr {
-      height: 1px;
-      margin: 22px 0;
-      border: 0;
-      background: var(--line);
-    }
+hr {
+  height: 1px;
+  margin: 22px 0;
+  border: 0;
+  background: var(--line);
+}
 
-    .toolbar { margin-bottom: 16px; }
+.builder-options {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
 
-    .option-label {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-    }
+.option-group {
+  display: grid;
+  gap: 9px;
+}
 
-    .option-label input {
-      width: 18px;
-      min-height: 18px;
-      accent-color: var(--accent);
-    }
+.option-group > input { max-width: 420px; }
+.execute-coordinates { margin-top: 1px; }
 
-    #commands {
-      display: grid;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
+.toolbar { margin-bottom: 16px; }
 
-    .command-row {
-      display: grid;
-      grid-template-columns: minmax(120px, .9fr) minmax(120px, .85fr) auto minmax(180px, 2fr) auto auto auto;
-      align-items: center;
-      gap: 8px;
-      padding: 10px;
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      background: rgba(10, 17, 12, .36);
-    }
+.option-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+}
 
-    .command-row select, .command-row input { min-width: 0; }
-    .command-row .auto-label { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--muted); }
-    .command-row .auto-label input { width: 18px; min-height: 18px; accent-color: var(--accent); }
-    .command-row .row-action { min-width: 40px; padding-inline: 10px; }
-    .command-row .delete-action { color: var(--danger); }
+.option-label input {
+  width: 18px;
+  min-height: 18px;
+  accent-color: var(--accent);
+}
 
-    #out { min-height: 290px; }
-    #escapeIn, #escapeOut { min-height: 150px; }
-    #mineCommands { min-height: 180px; }
-    #mineOut { min-height: 290px; }
+#commands {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
 
-    #escape > input { max-width: 180px; margin-bottom: 20px; }
-    #escape > button, #minecart > button { margin-top: 14px; }
+.command-row {
+  display: grid;
+  grid-template-columns: minmax(120px, .9fr) minmax(120px, .85fr) auto minmax(180px, 2fr) auto auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(10, 17, 12, .36);
+}
 
-    @media (max-width: 760px) {
-      .command-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .command-row .command-input { grid-column: 1 / -1; }
-      .command-row .auto-label { justify-self: start; }
-    }
+.command-row.custom-type {
+  grid-template-columns: minmax(120px, .9fr) minmax(120px, .85fr) minmax(180px, 1fr) auto auto auto;
+}
 
-    @media (max-width: 520px) {
-      body { padding-top: 18px; }
-      .coordinates { grid-template-columns: 1fr; }
-      .toolbar button, .tabs button { flex: 1 1 calc(50% - 8px); }
-      .command-row { grid-template-columns: 1fr 1fr; }
-      .command-row select:first-child { grid-column: 1 / -1; }
-      .command-row .row-action { min-width: 0; }
-      #builder, #escape, #minecart { border-radius: 10px; }
-    }
+.command-row select, .command-row input { min-width: 0; }
+.command-row .auto-label { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: var(--muted); }
+.command-row .auto-label input { width: 18px; min-height: 18px; accent-color: var(--accent); }
+.command-row .row-action { min-width: 40px; padding-inline: 10px; }
+.command-row .delete-action { color: var(--danger); }
+
+#out { min-height: 290px; }
+#escapeIn, #escapeOut { min-height: 150px; }
+#mineCommands { min-height: 180px; }
+#mineOut { min-height: 290px; }
+
+#escape > input { max-width: 180px; margin-bottom: 20px; }
+#escape > button, #minecart > button { margin-top: 14px; }
+
+@media (max-width: 760px) {
+  .command-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .command-row.custom-type { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .command-row .custom-blockstate-input { grid-column: 1 / -1; }
+  .command-row .command-input { grid-column: 1 / -1; }
+  .command-row .auto-label { justify-self: start; }
+}
+
+@media (max-width: 520px) {
+  body { padding-top: 18px; }
+  .coordinates { grid-template-columns: 1fr; }
+  .toolbar button, .tabs button { flex: 1 1 calc(50% - 8px); }
+  .command-row { grid-template-columns: 1fr 1fr; }
+  .command-row select:first-child { grid-column: 1 / -1; }
+  .command-row .row-action { min-width: 0; }
+  #builder, #escape, #minecart { border-radius: 10px; }
+}
+
   </style>
 </head>
 <body>
@@ -196,6 +218,20 @@
       <label class="coordinate">X: <input id="ox" value="~" /></label>
       <label class="coordinate">Y: <input id="oy" value="~1" /></label>
       <label class="coordinate">Z: <input id="oz" value="~" /></label>
+    </div>
+
+    <div class="builder-options">
+      <div class="option-group">
+        <label class="option-label">
+          <input id="executeAtEnabled" type="checkbox" onchange="updateOptionState()" />
+          Execute commands at
+        </label>
+        <div class="coordinates execute-coordinates">
+          <label class="coordinate">X: <input id="ex" value="~" aria-label="Execute X position" disabled /></label>
+          <label class="coordinate">Y: <input id="ey" value="~" aria-label="Execute Y position" disabled /></label>
+          <label class="coordinate">Z: <input id="ez" value="~" aria-label="Execute Z position" disabled /></label>
+        </div>
+      </div>
     </div>
 
     <hr />
@@ -242,211 +278,301 @@ say world"></textarea>
     <textarea id="mineOut" aria-label="Generated minecart command output"></textarea>
   </div>
 
-  <script>
+  <script type="module">
+    // by User Request: NEVER split the single-file structure without explicit prompt to.
     function allDirection(dir) {
-      commands.forEach((c) => { c.direction = dir; });
-      render();
+  commands.forEach((c) => { c.direction = dir; });
+  render();
+}
+
+function reverseCommands() {
+  commands.reverse();
+  render();
+}
+
+function shiftUp(i) {
+  if (i <= 0) return;
+  [commands[i], commands[i - 1]] = [commands[i - 1], commands[i]];
+  render();
+}
+
+function shiftDown(i) {
+  if (i >= commands.length - 1) return;
+  [commands[i], commands[i + 1]] = [commands[i + 1], commands[i]];
+  render();
+}
+
+function deleteCommand(i) {
+  commands.splice(i, 1);
+  render();
+}
+
+function tab(name, selectedButton) {
+  ["builder", "escape", "minecart"].forEach((id) => {
+    document.getElementById(id).hidden = id !== name;
+  });
+
+  document.querySelectorAll(".tabs button").forEach((button) => {
+    const selected = button === selectedButton;
+    button.classList.toggle("active", selected);
+    button.setAttribute("aria-selected", selected);
+  });
+}
+
+function generateMinecart() {
+  const cmds = document.getElementById("mineCommands").value
+    .split("\n")
+    .filter((x) => x.trim() !== "");
+
+  const passengers = [
+    { id: "falling_block", BlockState: { Name: "activator_rail" } },
+  ];
+
+  cmds.forEach((cmd) => {
+    passengers.push({
+      id: "command_block_minecart",
+      Command: cmd,
+    });
+  });
+
+  const redstone = {
+    id: "falling_block",
+    BlockState: { Name: "redstone_block" },
+    Passengers: passengers,
+  };
+
+  document.getElementById("mineOut").value = `summon minecraft:falling_block ~ ~1 ~ ` + nbt(redstone);
+}
+
+// COMMAND BUILDER
+let commands = [];
+
+function add() {
+  commands.push({ type: "normal", auto: true, direction: "up", customBlockState: "", command: "say hello" });
+  render();
+}
+
+function addOption(select, value, text) {
+  const option = document.createElement("option");
+  option.value = value;
+  option.textContent = text;
+  select.appendChild(option);
+}
+
+function createSelect(options, value, onChange) {
+  const select = document.createElement("select");
+  options.forEach(([optionValue, optionText]) => addOption(select, optionValue, optionText));
+  select.value = value;
+  select.addEventListener("change", () => onChange(select.value));
+  return select;
+}
+
+function render() {
+  const container = document.getElementById("commands");
+  container.replaceChildren();
+
+  commands.forEach((c, i) => {
+    const row = document.createElement("div");
+    row.className = "command-row";
+
+    row.appendChild(createSelect([
+      ["normal", "Normal"], ["chain", "Chain"], ["repeat", "Repeat"], ["redstone", "Redstone Block"], ["custom", "Custom BlockState"],
+    ], c.type, (value) => { c.type = value; render(); }));
+
+    row.appendChild(createSelect([
+      ["up", "Up"], ["down", "Down"], ["north", "North"], ["south", "South"], ["east", "East"], ["west", "West"],
+    ], c.direction, (value) => { c.direction = value; }));
+
+    if (c.type !== "custom") {
+      const autoLabel = document.createElement("label");
+      autoLabel.className = "auto-label";
+      autoLabel.textContent = "Auto";
+      const auto = document.createElement("input");
+      auto.type = "checkbox";
+      auto.checked = c.auto;
+      auto.addEventListener("change", () => { c.auto = auto.checked; });
+      autoLabel.appendChild(auto);
+      row.appendChild(autoLabel);
     }
 
-    function reverseCommands() {
-      commands.reverse();
-      render();
+    if (c.type === "custom") {
+      row.classList.add("custom-type");
+      const customBlockStateInput = document.createElement("input");
+      customBlockStateInput.className = "custom-blockstate-input";
+      customBlockStateInput.value = c.customBlockState || "";
+      customBlockStateInput.placeholder = "BlockState name";
+      customBlockStateInput.title = "Custom BlockState name";
+      customBlockStateInput.setAttribute("aria-label", `Custom BlockState name ${i + 1}`);
+      customBlockStateInput.addEventListener("input", () => { c.customBlockState = customBlockStateInput.value; });
+      row.appendChild(customBlockStateInput);
     }
 
-    function shiftUp(i) {
-      if (i <= 0) return;
-      [commands[i], commands[i - 1]] = [commands[i - 1], commands[i]];
-      render();
+    if (c.type !== "custom") {
+      const commandInput = document.createElement("input");
+      commandInput.className = "command-input";
+      commandInput.value = c.command;
+      commandInput.setAttribute("aria-label", `Command ${i + 1}`);
+      commandInput.addEventListener("input", () => { c.command = commandInput.value; });
+      row.appendChild(commandInput);
     }
 
-    function shiftDown(i) {
-      if (i >= commands.length - 1) return;
-      [commands[i], commands[i + 1]] = [commands[i + 1], commands[i]];
-      render();
+    const up = document.createElement("button");
+    up.className = "row-action";
+    up.textContent = "↑";
+    up.title = "Move up";
+    up.setAttribute("aria-label", "Move command up");
+    up.onclick = () => shiftUp(i);
+    row.appendChild(up);
+
+    const down = document.createElement("button");
+    down.className = "row-action";
+    down.textContent = "↓";
+    down.title = "Move down";
+    down.setAttribute("aria-label", "Move command down");
+    down.onclick = () => shiftDown(i);
+    row.appendChild(down);
+
+    const remove = document.createElement("button");
+    remove.className = "row-action delete-action";
+    remove.textContent = "×";
+    remove.title = "Delete command";
+    remove.setAttribute("aria-label", "Delete command");
+    remove.onclick = () => deleteCommand(i);
+    row.appendChild(remove);
+
+    container.appendChild(row);
+  });
+}
+
+function updateOptionState() {
+  const executeAtEnabled = document.getElementById("executeAtEnabled").checked;
+  ["ex", "ey", "ez"].forEach((id) => {
+    document.getElementById(id).disabled = !executeAtEnabled;
+  });
+}
+
+function escapeNBT(s) {
+  return s.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+}
+
+function coordinateValue(value) {
+  const match = value.trim().match(/^([~^])([+-]?(?:\d+(?:\.\d*)?|\.\d+))?$/);
+  if (!match) return null;
+  return Number(match[2] || 0);
+}
+
+function relativeCoordinate(value, offset) {
+  const trimmed = value.trim();
+  const match = trimmed.match(/^([~^])([+-]?(?:\d+(?:\.\d*)?|\.\d+))?$/);
+  if (!match) return trimmed;
+
+  const next = Number(match[2] || 0) + offset;
+  const formatted = Number.isInteger(next) ? String(next) : String(next);
+  return match[1] + (next === 0 ? "" : formatted);
+}
+
+function executeCoordinate(target, stackOffset) {
+  const targetValue = coordinateValue(target);
+
+  // The first generated falling block is the origin. Later falling blocks
+  // are offset from it, so compensate their relative Y coordinate.
+  if (targetValue !== null && target.trim().startsWith("~")) {
+    return relativeCoordinate(target, stackOffset);
+  }
+
+  return target.trim();
+}
+
+function executePositionForBlock(index) {
+  const stackOffset = -index;
+  const x = executeCoordinate(document.getElementById("ex").value, 0);
+  const y = executeCoordinate(document.getElementById("ey").value, stackOffset);
+  const z = executeCoordinate(document.getElementById("ez").value, 0);
+  return `${x} ${y} ${z}`;
+}
+
+function makeBlock(c, executeAtEnabled, index) {
+  const name = c.type === "custom"
+    ? c.customBlockState.trim() || "command_block"
+    : c.type === "redstone"
+      ? "redstone_block"
+      : c.type === "chain"
+        ? "chain_command_block"
+        : c.type === "repeat"
+          ? "repeating_command_block"
+          : "command_block";
+
+  if (c.type === "custom" || c.type === "redstone") {
+    return { id: "falling_block", BlockState: { Name: name } };
+  }
+
+  const command = executeAtEnabled
+    ? `execute at ${executePositionForBlock(index)} run ${c.command}`
+    : c.command;
+
+  return {
+    id: "falling_block",
+    BlockState: { Name: name, Properties: { facing: c.direction } },
+    TileEntityData: { auto: c.auto ? 1 : 0, Command: command },
+  };
+}
+
+function nbt(obj) {
+  if (Array.isArray(obj)) return "[" + obj.map(nbt).join(",") + "]";
+  if (typeof obj === "object") return "{" + Object.entries(obj).map(([k, v]) => k + ":" + nbt(v)).join(",") + "}";
+  if (typeof obj === "string") return '"' + escapeNBT(obj) + '"';
+  return obj;
+}
+
+function stackBlocks(blocks, useArmourStands) {
+  let result = null;
+  for (let i = blocks.length - 1; i >= 0; i--) {
+    const block = blocks[i];
+    if (result) {
+      block.Passengers = useArmourStands
+        ? [{ id: "armor_stand", Health: 0, Invisible: 1, Passengers: [result] }]
+        : [result];
     }
+    result = block;
+  }
+  return result;
+}
 
-    function deleteCommand(i) {
-      commands.splice(i, 1);
-      render();
-    }
+function generate() {
+  const useArmourStands = document.getElementById("armourStands").checked;
+  const executeAtEnabled = document.getElementById("executeAtEnabled").checked;
+  const stack = stackBlocks(
+    commands.map((command, index) => makeBlock(command, executeAtEnabled, index)),
+    useArmourStands,
+  );
+  const x = document.getElementById("ox").value;
+  const y = document.getElementById("oy").value;
+  const z = document.getElementById("oz").value;
+  document.getElementById("out").value = `summon minecraft:falling_block ${x} ${y} ${z} ` + nbt(stack);
+}
 
-    function tab(name, selectedButton) {
-      ["builder", "escape", "minecart"].forEach((id) => {
-        document.getElementById(id).hidden = id !== name;
-      });
+// QUOTE ESCAPER
+function escapeText() {
+  const level = Number(document.getElementById("level").value);
+  const amount = 2 ** level - 1;
+  const slashes = "\\".repeat(amount);
+  document.getElementById("escapeOut").value = document.getElementById("escapeIn").value.replaceAll('"', slashes + '"');
+}
 
-      document.querySelectorAll(".tabs button").forEach((button) => {
-        const selected = button === selectedButton;
-        button.classList.toggle("active", selected);
-        button.setAttribute("aria-selected", selected);
-      });
-    }
+Object.assign(window, {
+  add,
+  allDirection,
+  escapeText,
+  generate,
+  generateMinecart,
+  reverseCommands,
+  tab,
+  updateOptionState,
+});
 
-    function generateMinecart() {
-      const cmds = document.getElementById("mineCommands").value
-        .split("\n")
-        .filter((x) => x.trim() !== "");
+updateOptionState();
+add();
 
-      const passengers = [
-        { id: "falling_block", BlockState: { Name: "activator_rail" } },
-      ];
-
-      cmds.forEach((cmd) => {
-        passengers.push({
-          id: "command_block_minecart",
-          Command: cmd,
-        });
-      });
-
-      const redstone = {
-        id: "falling_block",
-        BlockState: { Name: "redstone_block" },
-        Passengers: passengers,
-      };
-
-      document.getElementById("mineOut").value = `summon minecraft:falling_block ~ ~1 ~ ` + nbt(redstone);
-    }
-
-    // COMMAND BUILDER
-    let commands = [];
-
-    function add() {
-      commands.push({ type: "normal", auto: true, direction: "up", command: "say hello" });
-      render();
-    }
-
-    function addOption(select, value, text) {
-      const option = document.createElement("option");
-      option.value = value;
-      option.textContent = text;
-      select.appendChild(option);
-    }
-
-    function createSelect(options, value, onChange) {
-      const select = document.createElement("select");
-      options.forEach(([optionValue, optionText]) => addOption(select, optionValue, optionText));
-      select.value = value;
-      select.addEventListener("change", () => onChange(select.value));
-      return select;
-    }
-
-    function render() {
-      const container = document.getElementById("commands");
-      container.replaceChildren();
-
-      commands.forEach((c, i) => {
-        const row = document.createElement("div");
-        row.className = "command-row";
-
-        row.appendChild(createSelect([
-          ["normal", "Normal"], ["chain", "Chain"], ["repeat", "Repeat"], ["redstone", "Redstone Block"],
-        ], c.type, (value) => { c.type = value; }));
-
-        row.appendChild(createSelect([
-          ["up", "Up"], ["down", "Down"], ["north", "North"], ["south", "South"], ["east", "East"], ["west", "West"],
-        ], c.direction, (value) => { c.direction = value; }));
-
-        const autoLabel = document.createElement("label");
-        autoLabel.className = "auto-label";
-        autoLabel.textContent = "Auto";
-        const auto = document.createElement("input");
-        auto.type = "checkbox";
-        auto.checked = c.auto;
-        auto.addEventListener("change", () => { c.auto = auto.checked; });
-        autoLabel.appendChild(auto);
-        row.appendChild(autoLabel);
-
-        const commandInput = document.createElement("input");
-        commandInput.className = "command-input";
-        commandInput.value = c.command;
-        commandInput.setAttribute("aria-label", `Command ${i + 1}`);
-        commandInput.addEventListener("input", () => { c.command = commandInput.value; });
-        row.appendChild(commandInput);
-
-        const up = document.createElement("button");
-        up.className = "row-action";
-        up.textContent = "↑";
-        up.title = "Move up";
-        up.setAttribute("aria-label", "Move command up");
-        up.onclick = () => shiftUp(i);
-        row.appendChild(up);
-
-        const down = document.createElement("button");
-        down.className = "row-action";
-        down.textContent = "↓";
-        down.title = "Move down";
-        down.setAttribute("aria-label", "Move command down");
-        down.onclick = () => shiftDown(i);
-        row.appendChild(down);
-
-        const remove = document.createElement("button");
-        remove.className = "row-action delete-action";
-        remove.textContent = "×";
-        remove.title = "Delete command";
-        remove.setAttribute("aria-label", "Delete command");
-        remove.onclick = () => deleteCommand(i);
-        row.appendChild(remove);
-
-        container.appendChild(row);
-      });
-    }
-
-    function escapeNBT(s) {
-      return s.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
-    }
-
-    function makeBlock(c) {
-      if (c.type === "redstone") {
-        return { id: "falling_block", BlockState: { Name: "redstone_block" } };
-      }
-
-      const name = c.type === "chain" ? "chain_command_block" : c.type === "repeat" ? "repeating_command_block" : "command_block";
-      return {
-        id: "falling_block",
-        BlockState: { Name: name, Properties: { facing: c.direction } },
-        TileEntityData: { auto: c.auto ? 1 : 0, Command: c.command },
-      };
-    }
-
-    function nbt(obj) {
-      if (Array.isArray(obj)) return "[" + obj.map(nbt).join(",") + "]";
-      if (typeof obj === "object") return "{" + Object.entries(obj).map(([k, v]) => k + ":" + nbt(v)).join(",") + "}";
-      if (typeof obj === "string") return '"' + escapeNBT(obj) + '"';
-      return obj;
-    }
-
-    function stackBlocks(blocks, useArmourStands) {
-      let result = null;
-      for (let i = blocks.length - 1; i >= 0; i--) {
-        const block = blocks[i];
-        if (result) {
-          block.Passengers = useArmourStands
-            ? [{ id: "armor_stand", Health: 0, Invisible: 1, Passengers: [result] }]
-            : [result];
-        }
-        result = block;
-      }
-      return result;
-    }
-
-    function generate() {
-      const useArmourStands = document.getElementById("armourStands").checked;
-      const stack = stackBlocks(commands.map(makeBlock), useArmourStands);
-      const x = document.getElementById("ox").value;
-      const y = document.getElementById("oy").value;
-      const z = document.getElementById("oz").value;
-      document.getElementById("out").value = `summon minecraft:falling_block ${x} ${y} ${z} ` + nbt(stack);
-    }
-
-    // QUOTE ESCAPER
-    function escapeText() {
-      const level = Number(document.getElementById("level").value);
-      const amount = 2 ** level - 1;
-      const slashes = "\\".repeat(amount);
-      document.getElementById("escapeOut").value = document.getElementById("escapeIn").value.replaceAll('"', slashes + '"');
-    }
-
-    add();
   </script>
 </body>
 </html>
