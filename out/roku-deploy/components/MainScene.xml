@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<component name="MainScene" extends="Scene">
+    <script type="text/brightscript" uri="pkg:/components/MainScene.brs"/>
+
+    <children>
+        <LabelList
+            id="menu"
+            translation="[100,100]"
+            itemSize="[600,60]"
+            drawFocusFeedback="true"/>
+
+        <Video
+            id="video"
+            visible="false"/>
+
+        <Keyboard id = "keyboard" />
+    </children>
+</component>

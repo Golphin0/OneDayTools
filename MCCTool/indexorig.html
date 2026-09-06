@@ -1,0 +1,630 @@
+<!doctype html>
+  
+<html>
+  
+<body>
+  
+<h2>MCC Tool</h2>
+  
+
+  
+<button onclick="tab('builder')">Command Builder</button>
+  
+<button onclick="tab('escape')">Quote Escaper</button>
+  
+<button onclick="tab('minecart')">Minecart Builder</button>
+  
+
+  
+<div id="builder">
+  
+    <h3>Falling Block Offset</h3>
+  
+    X:
+  
+    <input id="ox" value="~" />
+  
+    Y:
+  
+    <input id="oy" value="~1" />
+  
+    Z:
+  
+    <input id="oz" value="~" />
+  
+
+  
+    <hr />
+  
+
+  
+    <button onclick="add()">Add Command</button>
+  
+    <button onclick="generate()">Generate</button>
+  
+    <button onclick="allDirection('up')">All Up</button>
+  
+    <button onclick="allDirection('down')">All Down</button>
+  
+    <button onclick="reverseCommands()">Reverse Order</button>
+  
+
+  
+    <div id="commands"></div>
+  
+
+  
+    <textarea id="out" style="width: 100%; height: 400px"></textarea>
+  
+</div>
+  
+
+  
+<div id="escape" style="display: none">
+  
+    <h3>Quote Escaper</h3>
+  
+
+  
+    Level:
+  
+    <input id="level" type="number" min="0" value="1" />
+  
+
+  
+    <br /><br />
+  
+
+  
+    <textarea id="escapeIn" style="width: 100%; height: 150px" placeholder='text with "quotes"'></textarea>
+  
+
+  
+    <br />
+  
+
+  
+    <button onclick="escapeText()">Escape</button>
+  
+
+  
+    <br /><br />
+  
+
+  
+    <textarea id="escapeOut" style="width: 100%; height: 150px"></textarea>
+  
+</div>
+  
+
+  
+<div id="minecart" style="display: none">
+  
+    <h3>Falling Redstone Activator Rail</h3>
+  
+
+  
+    <textarea
+  
+        id="mineCommands"
+  
+        style="width: 100%; height: 200px"
+  
+        placeholder="say hello
+  
+say world"
+  
+    ></textarea>
+  
+
+  
+    <br />
+  
+
+  
+    <button onclick="generateMinecart()">Generate</button>
+  
+
+  
+    <br /><br />
+  
+
+  
+    <textarea id="mineOut" style="width: 100%; height: 400px"></textarea>
+  
+</div>
+  
+
+  
+<script>
+  
+function allDirection(dir) {
+  
+    commands.forEach((c) => {
+  
+        c.direction = dir;
+  
+    });
+  
+    render();
+  
+}
+  
+
+  
+function reverseCommands() {
+  
+    commands.reverse();
+  
+    render();
+  
+}
+  
+
+  
+function shiftUp(i) {
+  
+    if (i <= 0) return;
+  
+
+  
+    let temp = commands[i];
+  
+    commands[i] = commands[i - 1];
+  
+    commands[i - 1] = temp;
+  
+
+  
+    render();
+  
+}
+  
+
+  
+function shiftDown(i) {
+  
+    if (i >= commands.length - 1) return;
+  
+
+  
+    let temp = commands[i];
+  
+    commands[i] = commands[i + 1];
+  
+    commands[i + 1] = temp;
+  
+
+  
+    render();
+  
+}
+  
+
+  
+function deleteCommand(i) {
+  
+    commands.splice(i, 1);
+  
+    render();
+  
+}
+  
+
+  
+function tab(name) {
+  
+    document.getElementById("builder").style.display = name == "builder" ? "block" : "none";
+  
+
+  
+    document.getElementById("escape").style.display = name == "escape" ? "block" : "none";
+  
+
+  
+    document.getElementById("minecart").style.display = name == "minecart" ? "block" : "none";
+  
+}
+  
+
+  
+function generateMinecart() {
+  
+    let cmds = document
+  
+        .getElementById("mineCommands")
+  
+        .value.split("\n")
+  
+        .filter((x) => x.trim() != "");
+  
+
+  
+    let passengers = [
+  
+        {
+  
+            id: "falling_block",
+  
+            BlockState: {
+  
+                Name: "activator_rail",
+  
+            },
+  
+        },
+  
+    ];
+  
+
+  
+    cmds.forEach((cmd) => {
+  
+        passengers.push({
+  
+            id: "command_block_minecart",
+  
+            Command: cmd,
+  
+            CustomDisplayTile: 1,
+  
+        });
+  
+    });
+  
+
+  
+    let redstone = {
+  
+        id: "falling_block",
+  
+        BlockState: {
+  
+            Name: "redstone_block",
+  
+        },
+  
+        Passengers: passengers,
+  
+    };
+  
+
+  
+    document.getElementById("mineOut").value = `summon minecraft:falling_block ~ ~1 ~ ` + nbt(redstone);
+  
+}
+  
+
+  
+// COMMAND BUILDER
+  
+
+  
+let commands = [];
+  
+
+  
+function add() {
+  
+    commands.push({
+  
+        type: "normal",
+  
+        auto: true,
+  
+        direction: "up",
+  
+        command: "say hello",
+  
+    });
+  
+
+  
+    render();
+  
+}
+  
+
+  
+function render() {
+  
+    let d = document.getElementById("commands");
+  
+    d.innerHTML = "";
+  
+
+  
+    commands.forEach((c, i) => {
+  
+        let e = document.createElement("div");
+  
+
+  
+        e.innerHTML = `
+  
+
+  
+<select onchange="commands[${i}].type=this.value">
+  
+<option value="normal" ${c.type == "normal" ? "selected" : ""}>Normal</option>
+  
+<option value="chain" ${c.type == "chain" ? "selected" : ""}>Chain</option>
+  
+<option value="repeat" ${c.type == "repeat" ? "selected" : ""}>Repeat</option>
+  
+<option value="redstone" ${c.type == "redstone" ? "selected" : ""}>Redstone Block</option>
+  
+</select>
+  
+
+  
+Direction:
+  
+<select onchange="commands[${i}].direction=this.value">
+  
+<option value="up" ${c.direction == "up" ? "selected" : ""}>Up</option>
+  
+<option value="down" ${c.direction == "down" ? "selected" : ""}>Down</option>
+  
+<option value="north" ${c.direction == "north" ? "selected" : ""}>North</option>
+  
+<option value="south" ${c.direction == "south" ? "selected" : ""}>South</option>
+  
+<option value="east" ${c.direction == "east" ? "selected" : ""}>East</option>
+  
+<option value="west" ${c.direction == "west" ? "selected" : ""}>West</option>
+  
+</select>
+  
+
+  
+Auto:
+  
+<input
+  
+type="checkbox"
+  
+${c.auto ? "checked" : ""}
+  
+onchange="commands[${i}].auto=this.checked">
+  
+
+  
+<input
+  
+style="width:300px"
+  
+value="${c.command}"
+  
+onchange="commands[${i}].command=this.value">
+  
+
+  
+<button onclick="shiftUp(${i})">↑</button>
+  
+<button onclick="shiftDown(${i})">↓</button>
+  
+<button onclick="deleteCommand(${i})">X</button>
+  
+<br>
+  
+`;
+  
+
+  
+        d.appendChild(e);
+  
+    });
+  
+}
+  
+
+  
+function escapeNBT(s) {
+  
+    return s.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+  
+}
+  
+
+  
+function makeBlock(c) {
+  
+    if (c.type == "redstone") {
+  
+        return {
+  
+            id: "falling_block",
+  
+            BlockState: {
+  
+                Name: "redstone_block",
+  
+            },
+  
+        };
+  
+    }
+  
+
+  
+    let name =
+  
+        c.type == "chain"
+  
+            ? "chain_command_block"
+  
+            : c.type == "repeat"
+  
+                ? "repeating_command_block"
+  
+                : "command_block";
+  
+
+  
+    return {
+  
+        id: "falling_block",
+  
+        BlockState: {
+  
+            Name: name,
+  
+            Properties: {
+  
+                facing: c.direction,
+  
+            },
+  
+        },
+  
+        TileEntityData: {
+  
+            auto: c.auto ? 1 : 0,
+  
+            Command: c.command,
+  
+        },
+  
+    };
+  
+}
+  
+
+  
+function nbt(obj) {
+  
+    if (Array.isArray(obj)) return "[" + obj.map(nbt).join(",") + "]";
+  
+
+  
+    if (typeof obj == "object")
+  
+        return (
+  
+            "{" +
+  
+            Object.entries(obj)
+  
+                .map(([k, v]) => k + ":" + nbt(v))
+  
+                .join(",") +
+  
+            "}"
+  
+        );
+  
+
+  
+    if (typeof obj == "string") return '"' + escapeNBT(obj) + '"';
+  
+
+  
+    return obj;
+  
+}
+  
+
+  
+function addSpacers(blocks) {
+  
+    let result = null;
+  
+
+  
+    for (let i = blocks.length - 1; i >= 0; i--) {
+  
+        let b = blocks[i];
+  
+
+  
+        if (result) {
+  
+            b.Passengers = [
+  
+                {
+  
+                    id: "armor_stand",
+  
+                    Health: 0,
+  
+                    Invisible: 1,
+  
+                    Passengers: [result],
+  
+                },
+  
+            ];
+  
+        }
+  
+
+  
+        result = b;
+  
+    }
+  
+
+  
+    return result;
+  
+}
+  
+
+  
+function generate() {
+  
+    let stack = addSpacers(commands.map(makeBlock));
+  
+
+  
+    let x = document.getElementById("ox").value;
+  
+    let y = document.getElementById("oy").value;
+  
+    let z = document.getElementById("oz").value;
+  
+
+  
+    document.getElementById("out").value = `summon minecraft:falling_block ${x} ${y} ${z} ` + nbt(stack);
+  
+}
+  
+
+  
+// QUOTE ESCAPER
+  
+
+  
+function escapeText() {
+  
+    let level = Number(document.getElementById("level").value);
+  
+
+  
+    let amount = 2 ** level - 1;
+  
+
+  
+    let slashes = "\\".repeat(amount);
+  
+
+  
+    document.getElementById("escapeOut").value = document
+  
+        .getElementById("escapeIn")
+  
+        .value.replaceAll('"', slashes + '"');
+  
+}
+  
+
+  
+add();
+  
+</script>
+  
+</body>
+  
+</html>
+  
