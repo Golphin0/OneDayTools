@@ -133,7 +133,7 @@ hr {
 .option-group > input { max-width: 420px; }
 .execute-coordinates { margin-top: 1px; }
 
-.toolbar { margin-bottom: 16px; }
+.toolbar { margin-bottom: 24px; }
 
 .option-label {
   display: inline-flex;
@@ -224,7 +224,7 @@ hr {
       <div class="option-group">
         <label class="option-label">
           <input id="executeAtEnabled" type="checkbox" onchange="updateOptionState()" />
-          Execute commands at
+          Execute commands positioned
         </label>
         <div class="coordinates execute-coordinates">
           <label class="coordinate">X: <input id="ex" value="~" aria-label="Execute X position" disabled /></label>
@@ -507,7 +507,7 @@ function makeBlock(c, executeAtEnabled, index) {
   }
 
   const command = executeAtEnabled
-    ? `execute at ${executePositionForBlock(index)} run ${c.command}`
+    ? `execute positioned ${executePositionForBlock(index)} run ${c.command}`
     : c.command;
 
   return {
