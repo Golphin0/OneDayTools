@@ -180,6 +180,18 @@ hr {
 #mineCommands { min-height: 180px; }
 #mineOut { min-height: 290px; }
 
+.state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.state-actions input[type="file"] { display: none; }
+
+.state-mode { margin-left: 4px; }
+.state-status { min-height: 1.5em; margin-top: 6px; color: var(--muted); }
+
 #escape > input { max-width: 180px; margin-bottom: 20px; }
 #escape > button, #minecart > button { margin-top: 14px; }
 
@@ -252,6 +264,17 @@ hr {
     <div id="commands"></div>
 
     <textarea id="out" aria-label="Generated command output"></textarea>
+
+    <div class="state-actions" aria-label="Command builder state">
+      <button id="stateExport" onclick="exportBuilderState()">Copy State JSON</button>
+      <button id="stateImportButton" onclick="importBuilderState()">Paste State JSON</button>
+      <input id="stateImport" type="file" accept="application/json,.json" onchange="importBuilderState(event)" />
+      <label class="option-label state-mode">
+        <input id="stateDownloadMode" type="checkbox" onchange="updateStateMode()" />
+        Use download / file mode
+      </label>
+    </div>
+    <div id="stateStatus" class="state-status" role="status" aria-live="polite"></div>
   </div>
 
   <div id="escape" hidden>
@@ -348,7 +371,7 @@ function generateMinecart() {
 let commands = [];
 
 function add() {
-  commands.push({ type: "normal", auto: true, direction: "up", customBlockState: "", command: "say hello" });
+  commands.push({ type: "normal", auto: true, conditional: false, direction: "up", customBlockState: "", command: "say hello" });
   render();
 }
 
@@ -384,6 +407,9 @@ function render() {
     ], c.direction, (value) => { c.direction = value; }));
 
     if (c.type !== "custom") {
+      const flags = document.createElement("div");
+      flags.className = "auto-label";
+
       const autoLabel = document.createElement("label");
       autoLabel.className = "auto-label";
       autoLabel.textContent = "Auto";
@@ -392,7 +418,20 @@ function render() {
       auto.checked = c.auto;
       auto.addEventListener("change", () => { c.auto = auto.checked; });
       autoLabel.appendChild(auto);
-      row.appendChild(autoLabel);
+      flags.appendChild(autoLabel);
+
+      if (c.type !== "redstone") {
+        const conditionalLabel = document.createElement("label");
+        conditionalLabel.className = "auto-label";
+        conditionalLabel.textContent = "Conditional";
+        const conditional = document.createElement("input");
+        conditional.type = "checkbox";
+        conditional.checked = c.conditional;
+        conditional.addEventListener("change", () => { c.conditional = conditional.checked; });
+        conditionalLabel.appendChild(conditional);
+        flags.appendChild(conditionalLabel);
+      }
+      row.appendChild(flags);
     }
 
     if (c.type === "custom") {
@@ -512,13 +551,27 @@ function makeBlock(c, executeAtEnabled, index) {
 
   return {
     id: "falling_block",
-    BlockState: { Name: name, Properties: { facing: c.direction } },
-    TileEntityData: { auto: c.auto ? 1 : 0, Command: command },
+    BlockState: {
+      Name: name,
+      Properties: {
+        facing: c.direction,
+        ...(c.conditional ? { conditional: "true" } : {}),
+      },
+    },
+    TileEntityData: {
+      auto: nbtByte(c.auto ? 1 : 0),
+      Command: command,
+    },
   };
+}
+
+function nbtByte(value) {
+  return { __nbtByte: value };
 }
 
 function nbt(obj) {
   if (Array.isArray(obj)) return "[" + obj.map(nbt).join(",") + "]";
+  if (obj && typeof obj === "object" && obj.__nbtByte !== undefined) return obj.__nbtByte + "b";
   if (typeof obj === "object") return "{" + Object.entries(obj).map(([k, v]) => k + ":" + nbt(v)).join(",") + "}";
   if (typeof obj === "string") return '"' + escapeNBT(obj) + '"';
   return obj;
@@ -551,6 +604,135 @@ function generate() {
   document.getElementById("out").value = `summon minecraft:falling_block ${x} ${y} ${z} ` + nbt(stack);
 }
 
+function getBuilderState() {
+  return {
+    version: 1,
+    origin: {
+      x: document.getElementById("ox").value,
+      y: document.getElementById("oy").value,
+      z: document.getElementById("oz").value,
+    },
+    executeAt: {
+      enabled: document.getElementById("executeAtEnabled").checked,
+      x: document.getElementById("ex").value,
+      y: document.getElementById("ey").value,
+      z: document.getElementById("ez").value,
+    },
+    armourStands: document.getElementById("armourStands").checked,
+    commands: commands.map((command) => ({ ...command })),
+  };
+}
+
+function setStateStatus(message) {
+  document.getElementById("stateStatus").textContent = message;
+}
+
+function updateStateMode() {
+  const fileMode = document.getElementById("stateDownloadMode").checked;
+  document.getElementById("stateExport").textContent = fileMode
+    ? "Download State JSON"
+    : "Copy State JSON";
+  document.getElementById("stateImportButton").textContent = fileMode
+    ? "Import State JSON"
+    : "Paste State JSON";
+  setStateStatus("");
+}
+
+function downloadBuilderState(json) {
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "mcc-command-builder.json";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportBuilderState() {
+  const json = JSON.stringify(getBuilderState(), null, 2);
+  if (document.getElementById("stateDownloadMode").checked) {
+    downloadBuilderState(json);
+    setStateStatus("State downloaded.");
+    return;
+  }
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(json)
+      .then(() => setStateStatus("State copied to clipboard."))
+      .catch(() => window.prompt("Copy this JSON:", json));
+    return;
+  }
+
+  window.prompt("Copy this JSON:", json);
+}
+
+function importedCommand(command) {
+  if (!command || typeof command !== "object") return null;
+
+  const types = ["normal", "chain", "repeat", "redstone", "custom"];
+  const directions = ["up", "down", "north", "south", "east", "west"];
+  return {
+    type: types.includes(command.type) ? command.type : "normal",
+    auto: Boolean(command.auto),
+    conditional: Boolean(command.conditional),
+    direction: directions.includes(command.direction) ? command.direction : "up",
+    customBlockState: typeof command.customBlockState === "string" ? command.customBlockState : "",
+    command: typeof command.command === "string" ? command.command : "say hello",
+  };
+}
+
+function applyBuilderState(json) {
+  try {
+    const state = JSON.parse(json);
+    if (!state || typeof state !== "object" || !Array.isArray(state.commands)) {
+      throw new Error("Invalid command builder state");
+    }
+
+    const origin = state.origin || {};
+    const executeAt = state.executeAt || {};
+    const importedCommands = state.commands.map(importedCommand).filter(Boolean);
+
+    document.getElementById("ox").value = typeof origin.x === "string" ? origin.x : "~";
+    document.getElementById("oy").value = typeof origin.y === "string" ? origin.y : "~1";
+    document.getElementById("oz").value = typeof origin.z === "string" ? origin.z : "~";
+    document.getElementById("executeAtEnabled").checked = Boolean(executeAt.enabled);
+    document.getElementById("ex").value = typeof executeAt.x === "string" ? executeAt.x : "~";
+    document.getElementById("ey").value = typeof executeAt.y === "string" ? executeAt.y : "~";
+    document.getElementById("ez").value = typeof executeAt.z === "string" ? executeAt.z : "~";
+    document.getElementById("armourStands").checked = state.armourStands !== false;
+    commands = importedCommands;
+    updateOptionState();
+    render();
+    document.getElementById("out").value = "";
+    setStateStatus("State imported.");
+  } catch (error) {
+    setStateStatus("Could not import state: choose a valid JSON file or paste valid JSON.");
+  }
+}
+
+function importBuilderState(event) {
+  if (event && event.target && event.target.files) {
+    const file = event.target.files[0];
+    event.target.value = "";
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => applyBuilderState(reader.result);
+    reader.readAsText(file);
+    return;
+  }
+
+  if (document.getElementById("stateDownloadMode").checked) {
+    document.getElementById("stateImport").click();
+    return;
+  }
+
+  const json = window.prompt("Paste command builder JSON:");
+  if (json !== null) applyBuilderState(json);
+}
+
 // QUOTE ESCAPER
 function escapeText() {
   const level = Number(document.getElementById("level").value);
@@ -563,14 +745,18 @@ Object.assign(window, {
   add,
   allDirection,
   escapeText,
+  exportBuilderState,
   generate,
   generateMinecart,
+  importBuilderState,
   reverseCommands,
   tab,
   updateOptionState,
+  updateStateMode,
 });
 
 updateOptionState();
+updateStateMode();
 add();
 
   </script>
