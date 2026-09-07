@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<body>
+<h2>MCC Command Block Minecart Decompiler</h2>
+<p>MineCraft MineCart MultiCommand -> 3MC</p>
+
+<textarea id="in" style="width: 100%; height: 250px" placeholder="Paste summon command here"></textarea>
+<br /><br />
+<button onclick="extract()">Extract Commands</button>
+<br /><br />
+<textarea id="out" style="width: 100%; height: 350px"></textarea>
+
+<script>
+function extract() {
+    const text = document.getElementById("in").value;
+    const out = [];
+
+    let i = 0;
+
+    while ((i = text.indexOf("Command:", i)) !== -1) {
+        i += 8;
+
+        while (/\s/.test(text[i])) i++;
+
+        const quote = text[i];
+
+        if (quote !== '"' && quote !== "'") continue;
+
+        i++;
+
+        let cmd = "";
+        let escaped = false;
+
+        while (i < text.length) {
+            const c = text[i++];
+
+            if (escaped) {
+                cmd += "\\" + c;
+                escaped = false;
+                continue;
+            }
+
+            if (c === "\\") {
+                escaped = true;
+                continue;
+            }
+
+            if (c === quote) break;
+
+            cmd += c;
+        }
+
+        // Undo ONE level of escaping
+        cmd = cmd.replace(/\\\\/g, "\\").replace(/\\"/g, '"').replace(/\\'/g, "'");
+
+        out.push(cmd);
+    }
+
+    document.getElementById("out").value = out.join("\n");
+}
+</script>
+</body>
+</html>

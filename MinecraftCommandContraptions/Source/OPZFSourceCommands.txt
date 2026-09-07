@@ -1,0 +1,52 @@
+fill ~5 ~5 ~ ~11 ~14 ~5 bedrock
+fill ~5 ~6 ~1 ~11 ~13 ~4 glass
+fill ~6 ~6 ~ ~10 ~13 ~5 glass
+fill ~6 ~6 ~1 ~10 ~13 ~4 air
+setblock ~6 ~6 ~1 repeating_command_block[facing=up]{auto:1b,Command:"execute as @e[type=minecraft:armor_stand,tag=dropPoint] at @s unless entity @e[type=minecraft:zombie,tag=dropZombie] run summon minecraft:item ~ ~ ~ {Item:{id:\"minecraft:diamond_pickaxe\",count:1,components:{auto:1b,custom_name:[{\"text\":\"Miner\",\"color\":\"gold\",\"italic\":false}],unbreakable:{},enchantments:{efficiency:10,unbreaking:3}}}}"}
+setblock ~6 ~7 ~1 chain_command_block[facing=up]{auto:1b,Command:"execute as @e[type=minecraft:armor_stand,tag=dropPoint] at @s unless entity @e[type=minecraft:zombie,tag=dropZombie] run summon minecraft:item ~ ~ ~ {Item:{id:\"minecraft:diamond_axe\",count:1,components:{custom_name:[{\"text\":\"Chopper\",\"color\":\"gold\",\"italic\":false}],unbreakable:{},enchantments:{efficiency:10,unbreaking:3}}}}"}
+setblock ~6 ~8 ~1 chain_command_block[facing=up]{auto:1b,Command:"execute as @e[type=minecraft:armor_stand,tag=dropPoint] at @s unless entity @e[type=minecraft:zombie,tag=dropZombie] run summon minecraft:item ~ ~ ~ {Item:{id:\"minecraft:diamond_shovel\",count:1,components:{custom_name:[{\"text\":\"Digger\",\"color\":\"gold\",\"italic\":false}],unbreakable:{},enchantments:{efficiency:10,unbreaking:3}}}}"}
+setblock ~6 ~9 ~1 chain_command_block[facing=up]{auto:1b,Command:"execute as @e[type=minecraft:armor_stand,tag=dropPoint] at @s unless entity @e[type=minecraft:zombie,tag=dropZombie] run summon minecraft:item ~ ~ ~ {Item:{id:\"minecraft:diamond_hoe\",count:1,components:{custom_name:[{\"text\":\"Harvester\",\"color\":\"gold\",\"italic\":false}],unbreakable:{},enchantments:{efficiency:10,unbreaking:3}}}}"}
+setblock ~6 ~10 ~1 chain_command_block[facing=up]{auto:1b,Command:"execute as @e[type=minecraft:armor_stand,tag=dropPoint] at @s unless entity @e[type=minecraft:zombie,tag=dropZombie] run summon minecraft:item ~ ~ ~ {Item:{id:\"minecraft:diamond_sword\",count:1,components:{custom_name:[{\"text\":\"Slasher\",\"color\":\"gold\",\"italic\":false}],unbreakable:{},enchantments:{sharpness:10,unbreaking:3}}}}"}
+setblock ~6 ~11 ~1 chain_command_block[facing=up]{auto:1b,Command:"execute as @e[type=minecraft:armor_stand,tag=dropPoint] at @s unless entity @e[type=minecraft:zombie,tag=dropZombie] run particle minecraft:flame ~ ~ ~ 1 1 1 1 500"}
+setblock ~6 ~12 ~1 chain_command_block[facing=up]{auto:1b,Command:"execute as @e[type=minecraft:armor_stand,tag=dropPoint] at @p unless entity @e[type=minecraft:zombie,tag=dropZombie] run playsound minecraft:entity.wither.death master @p ~ ~ ~ 100 1 1"}
+setblock ~6 ~13 ~1 chain_command_block[facing=east]{auto:1b,Command:"execute as @e[type=minecraft:armor_stand,tag=dropPoint] at @s unless entity @e[type=minecraft:zombie,tag=dropZombie] run bossbar set zombiehp players"}
+setblock ~7 ~13 ~1 chain_command_block[facing=down]{auto:1b,Command:"execute as @e[type=minecraft:armor_stand,tag=dropPoint] at @s unless entity @e[type=minecraft:zombie,tag=dropZombie] run kill @s"}
+setblock ~6 ~6 ~2 repeating_command_block[facing=up]{auto:1b,Command:"execute as @e[type=minecraft:zombie,tag=dropZombie] store result score @s zombieRoll run random value 1..100"}
+setblock ~6 ~7 ~2 chain_command_block[facing=up]{auto:1b,Command:"execute as @e[type=minecraft:zombie,tag=dropZombie,scores={zombieRoll=1}] run effect give @s minecraft:levitation 1 8 true"}
+setblock ~6 ~8 ~2 repeating_command_block[facing=up]{auto:1b,Command:"effect give @e[type=minecraft:zombie,tag=dropZombie] minecraft:slow_falling 1 0 true"}
+setblock ~6 ~9 ~2 chain_command_block[facing=up]{auto:1b,Command:"execute as @e[type=minecraft:zombie,tag=dropZombie] at @s run particle minecraft:flame ~ ~1 ~ 0.5 1 0.5 0.1 10"}
+setblock ~6 ~10 ~2 repeating_command_block[facing=up]{auto:1b,Command:"effect give @e[type=minecraft:zombie,tag=dropZombie] minecraft:speed 1 16 true"}
+setblock ~6 ~10 ~2 repeating_command_block[facing=up]{auto:1b,Command:"execute store result bossbar minecraft:zombiehp value run data get entity @e[type=minecraft:zombie,tag=dropZombie,limit=1] Health 1"}
+setblock ~10 ~7 ~1 command_block[facing=up]{auto:0,Command:"setblock ~ ~-1 ~ minecraft:air"}
+setblock ~10 ~8 ~1 chain_command_block[facing=up]{auto:1b,Command:"kill @e[type=minecraft:armor_stand,tag=dropPoint]"}
+setblock ~10 ~9 ~1 chain_command_block[facing=up]{auto:1b,Command:"kill @e[type=minecraft:zombie,tag=dropZombie]"}
+setblock ~10 ~10 ~1 chain_command_block[facing=up]{auto:1b,Command:"summon minecraft:armor_stand ~1 ~5 ~-1 {Tags:[\"chunkForceload\"],Invisible:0,NoGravity:1b,Marker:1b}"}
+setblock ~10 ~11 ~1 chain_command_block[facing=up]{auto:1b,Command:"summon minecraft:armor_stand ~1 ~4 ~4 {Tags:[\"chunkForceload\"],Invisible:0,NoGravity:1b,Marker:1b}"}
+setblock ~10 ~12 ~1 chain_command_block[facing=up]{auto:1b,Command:"summon minecraft:armor_stand ~-5 ~3 ~-1 {Tags:[\"chunkForceload\"],Invisible:0,NoGravity:1b,Marker:1b}"}
+setblock ~10 ~13 ~1 chain_command_block[facing=west]{auto:1b,Command:"summon minecraft:armor_stand ~-5 ~2 ~4 {Tags:[\"chunkForceload\"],Invisible:0,NoGravity:1b,Marker:1b}"}
+setblock ~9 ~13 ~1 chain_command_block[facing=down]{auto:1b,Command:"execute as @e[type=minecraft:armor_stand,tag=chunkForceload] at @s run forceload remove ~ ~"}
+setblock ~9 ~12 ~1 chain_command_block[facing=down]{auto:1b,Command:"execute as @e[type=minecraft:armor_stand,tag=chunkForceload] run kill @s"}
+setblock ~9 ~11 ~1 chain_command_block[facing=down]{auto:1b,Command:"fill ~2 ~5 ~-1 ~-5 ~-13 ~4 minecraft:air"}
+setblock ~10 ~7 ~4 command_block[facing=up]{auto:0,Command:"setblock ~ ~-1 ~ minecraft:air"}
+setblock ~10 ~8 ~4 chain_command_block[facing=up]{auto:1b,Command:"summon minecraft:zombie ~-3 ~-5 ~-2 {Health:150,attributes:[{id:max_health,base:150f}],Tags:[\"dropZombie\"],equipment:{feet:{id:\"minecraft:leather_boots\",count:1,components:{unbreakable:{},enchantments:{aqua_affinity:1}}},legs:{id:\"minecraft:leather_leggings\",count:1,components:{unbreakable:{},enchantments:{aqua_affinity:1}}},chest:{id:\"minecraft:leather_chestplate\",count:1,components:{unbreakable:{},enchantments:{aqua_affinity:1}}},head:{id:\"minecraft:leather_helmet\",count:1,components:{unbreakable:{},enchantments:{aqua_affinity:1}}}},drop_chances:{feet:0.0f,legs:0.0f,chest:0.0f,head:0.0f},Passengers:[{id:\"minecraft:armor_stand\",Tags:[\"dropPoint\"],Invisible:1b,Marker:1b}]}"}
+setblock ~10 ~9 ~4 chain_command_block[facing=up]{auto:1b,Command:"particle minecraft:flame ~-3 ~-7 ~-2 2 2 2 1 2000"}
+setblock ~10 ~10 ~4 chain_command_block[facing=up]{auto:1b,Command:"execute as @p at @p run playsound minecraft:entity.wither.spawn master @p ~ ~ ~ 100 1 1"}
+setblock ~10 ~11 ~4 chain_command_block[facing=up]{auto:1b,Command:"execute as @p at @p run playsound minecraft:entity.wither.spawn master @p ~ ~ ~ 100 1 1"}
+setblock ~10 ~12 ~4 chain_command_block[facing=up]{auto:1b,Command:"bossbar add zombiehp {text:\"Zombie HP\"}"}
+setblock ~10 ~13 ~4 chain_command_block[facing=west]{auto:1b,Command:"bossbar set zombiehp players @a"}
+setblock ~9 ~13 ~4 chain_command_block[facing=down]{auto:1b,Command:"bossbar set zombiehp max 150"}
+fill ~6 ~-2 ~1 ~6 ~ ~4 minecraft:quartz_pillar
+fill ~6 ~-1 ~1 ~6 ~-1 ~4 command_block[facing=up]{auto:0,Command:"setblock ~4 ~7 ~ minecraft:redstone_block"}
+fill ~5 ~-1 ~1 ~5 ~-1 ~4 minecraft:oak_button[facing=west]
+fill ~6 ~-2 ~2 ~5 ~ ~3 minecraft:air
+setblock ~5 ~ ~1 minecraft:oak_wall_sign[facing=west]{front_text:{messages:["","Press to","delete mod",""]}}
+setblock ~5 ~ ~4 minecraft:oak_wall_sign[facing=west]{front_text:{messages:["","Press to","begin fight",""]}}
+summon minecraft:armor_stand ~5 ~15 ~ {Tags:["chunkForceload"],Invisible:1b,NoGravity:1b,Marker:1b}
+summon minecraft:armor_stand ~5 ~15 ~5 {Tags:["chunkForceload"],Invisible:1b,NoGravity:1b,Marker:1b}
+summon minecraft:armor_stand ~11 ~15 ~ {Tags:["chunkForceload"],Invisible:1b,NoGravity:1b,Marker:1b}
+summon minecraft:armor_stand ~11 ~15 ~5 {Tags:["chunkForceload"],Invisible:1b,NoGravity:1b,Marker:1b}
+execute as @e[type=minecraft:armor_stand,tag=chunkForceload] at @s run forceload add ~ ~
+execute as @e[type=minecraft:armor_stand,tag=chunkForceload] run kill @s
+bossbar set zombiehp max 150
+summon minecraft:falling_block ~1 ~1 ~1 {id:"falling_block",BlockState:{Name:"chain_command_block",Properties:{facing:"down"}},TileEntityData:{auto:1,Command:"fill ~-3 ~ ~-3 ~3 ~2 ~3 air"},Passengers:[{id:"armor_stand",Health:0,Invisible:1,Passengers:[{id:"falling_block",BlockState:{Name:"command_block",Properties:{facing:"down"}},TileEntityData:{auto:1,Command:"kill @e[type=command_block_minecart]"}}]}]}
+setblock ~ ~ ~ air

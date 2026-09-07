@@ -1,0 +1,209 @@
+{
+  "version": 1,
+  "origin": {
+    "x": "~",
+    "y": "~1",
+    "z": "~"
+  },
+  "executeAt": {
+    "enabled": true,
+    "x": "~",
+    "y": "~",
+    "z": "~"
+  },
+  "armourStands": true,
+  "commands": [
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "tellraw @a {text:\"Now Installing Movement Mod!\",bold:true,color:\"green\"}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "gamerule command_block_output true"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "fill ~5 ~5 ~ ~11 ~11 ~6 bedrock"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "fill ~5 ~6 ~1 ~11 ~10 ~5 glass"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "fill ~6 ~6 ~0 ~10 ~10 ~6 glass"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "fill ~6 ~6 ~1 ~10 ~11 ~5 air"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "summon minecraft:falling_block ~6 ~8 ~1 {id:\"falling_block\",BlockState:{Name:\"repeating_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1,Command:\"execute as @a run effect clear @s minecraft:speed\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"repeating_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1,Command:\"execute as @a if predicate {condition:\\\"minecraft:entity_properties\\\",entity:\\\"this\\\",predicate:{\\\"minecraft:type_specific/player\\\":{input:{left:1b,right:1b}}}} run effect give @s minecraft:speed 1 20 true\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1,Command:\"execute as @a at @s if predicate {condition:\\\"minecraft:entity_properties\\\",entity:\\\"this\\\",predicate:{\\\"minecraft:type_specific/player\\\":{input:{left:1b,right:1b}}}} run particle minecraft:flame ~ ~ ~ 0.25 0.25 0.25 0.1 25\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1,Command:\"execute as @a at @s if predicate {condition:\\\"minecraft:entity_properties\\\",entity:\\\"this\\\",predicate:{\\\"minecraft:type_specific/player\\\":{input:{left:1b,right:1b}}}} run playsound minecraft:block.amethyst_block.resonate master @s ~ ~ ~ 100 0 1\"}}]}]}]}]}]}]}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "summon minecraft:falling_block ~7 ~8 ~1 {id:\"falling_block\",BlockState:{Name:\"repeating_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1,Command:\"execute as @a if predicate {condition:\\\"minecraft:entity_properties\\\",entity:\\\"this\\\",predicate:{\\\"minecraft:type_specific/player\\\":{input:{jump:0b}}}} run effect clear @s minecraft:levitation\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"repeating_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1,Command:\"execute as @a if predicate {condition:\\\"minecraft:entity_properties\\\",entity:\\\"this\\\",predicate:{\\\"minecraft:type_specific/player\\\":{input:{jump:1b}}}} run effect give @s minecraft:levitation 1 8 true\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1,Command:\"execute as @a at @s if predicate {condition:\\\"minecraft:entity_properties\\\",entity:\\\"this\\\",predicate:{\\\"minecraft:type_specific/player\\\":{input:{jump:1b}}}} run particle minecraft:block{block_state:\\\"minecraft:amethyst_block\\\"} ~ ~ ~ 0.25 0.25 0.25 0.1 25\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1,Command:\"execute as @a at @s if predicate {condition:\\\"minecraft:entity_properties\\\",entity:\\\"this\\\",predicate:{\\\"minecraft:type_specific/player\\\":{input:{jump:1b}}}} run playsound minecraft:block.amethyst_block.resonate master @s ~ ~ ~ 100 0 1\"}}]}]}]}]}]}]}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "summon minecraft:falling_block ~10 ~6 ~1 {id:\"falling_block\",BlockState:{Name:\"repeating_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1,Command:\"execute as @a if score @s uninstallmodtrigger matches 1 run say Deleting Mod...\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"up\",conditional:\"true\"}},TileEntityData:{auto:1b,Command:\"setblock ~ ~1 ~ redstone_block\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"stone\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"command_block\",Properties:{facing:\"up\"}},TileEntityData:{Command:\"summon marker ~1 ~2 ~-1 {Tags:[\\\"forceloadmarker\\\"]}\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"south\"}},TileEntityData:{auto:1,Command:\"summon marker ~1 ~1 ~5 {Tags:[\\\"forceloadmarker\\\"]}\"}}]}]}]}]}]}]}]}]}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "summon minecraft:falling_block ~10 ~6 ~2 {id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"south\"}},TileEntityData:{auto:1,Command:\"say Deletion Complete.\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"down\"}},TileEntityData:{auto:1,Command:\"kill @e[type=marker,tag=forceloadmarker]\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"down\"}},TileEntityData:{auto:1,Command:\"execute as @e[type=marker,tag=forceloadmarker] at @s run forceload remove ~ ~\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"down\"}},TileEntityData:{auto:1,Command:\"summon marker ~6 ~1 ~-1 {Tags:[\\\"forceloadmarker\\\"]}\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"down\"}},TileEntityData:{auto:1,Command:\"summon marker ~6 ~2 ~5 {Tags:[\\\"forceloadmarker\\\"]}\"}}]}]}]}]}]}]}]}]}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "summon minecraft:falling_block ~10 ~6 ~3 {id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1b,Command:\"scoreboard players set @a uninstallmodtrigger 0\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1b,Command:\"clear @a written_book[custom_data~{movementmodmanager:1b}]\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1b,Command:\"fill ~1 ~-3 ~-3 ~-6 ~3 ~3 air\"}}]}]}]}]}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "summon minecraft:falling_block ~10 ~6 ~5 {id:\"falling_block\",BlockState:{Name:\"repeating_command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1b,Command:\"execute as @a[scores={movementmodgetbook=1}] run give @a written_book[written_book_content={pages:[[[\\\"MOVEMENT MOD MANAGER\\\\n\\\",{\\\"text\\\":\\\"Uninstall Mod\\\",\\\"bold\\\":true,\\\"color\\\":\\\"black\\\",\\\"click_event\\\":{\\\"action\\\":\\\"run_command\\\",\\\"command\\\":\\\"scoreboard players set @s uninstallmodtrigger 1\\\"}}]]],title:\\\"Movement Mod Manager\\\",author:Judah0},custom_data={movementmodmanager:1b}]\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"chain_command_block\",Properties:{facing:\"up\",conditional:\"true\"}},TileEntityData:{auto:1b,Command:\"scoreboard players set @a movementmodgetbook 0\"}}]}]}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "summon marker ~5 ~11 ~ {Tags:[\"forceloadmarker\"]}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "summon marker ~11 ~11 ~ {Tags:[\"forceloadmarker\"]}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "summon marker ~5 ~11 ~6 {Tags:[\"forceloadmarker\"]}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "summon marker ~11 ~11 ~6 {Tags:[\"forceloadmarker\"]}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "execute as @e[type=marker,tag=forceloadmarker] at @s run forceload add ~ ~"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "kill @e[type=marker,tag=forceloadmarker]"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "scoreboard objectives add uninstallmodtrigger dummy"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "give @a written_book[written_book_content={pages:[[[\"MOVEMENT MOD MANAGER\\n\",{\"text\":\"Uninstall Mod\",\"bold\":true,\"color\":\"black\",\"click_event\":{\"action\":\"run_command\",\"command\":\"scoreboard players set @s uninstallmodtrigger 1\"}}]]],title:\"Movement Mod Manager\",author:Judah0},custom_data={movementmodmanager:1b}]"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "gamerule command_block_output true"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "summon minecraft:falling_block ~5 ~20 ~ {id:\"falling_block\",BlockState:{Name:\"command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1b,Command:\"fill ~1 ~-1 ~1 ~5 ~-1 ~5 minecraft:bedrock\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1b,Command:\"tellraw @a {text:\\\"Installation Complete!\\\",bold:true,color:\\\"green\\\"}\"},Passengers:[{id:\"armor_stand\",Health:0,Invisible:1,Passengers:[{id:\"falling_block\",BlockState:{Name:\"command_block\",Properties:{facing:\"up\"}},TileEntityData:{auto:1b,Command:\"fill ~ ~ ~ ~ ~-2 ~ air\"}}]}]}]}]}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "setblock ~4 ~6 ~3 minecraft:oak_wall_sign[facing=west]{front_text:{messages:[{text:\"\"},{text:\"Click to get Mod\",color:\"gold\",click_event:{action:\"run_command\",command:\"/scoreboard players set @s movementmodgetbook 1\"}},{text:\"Manager Book\",color:\"gold\"},{text:\"\"}]}}"
+    },
+    {
+      "type": "normal",
+      "auto": true,
+      "conditional": false,
+      "direction": "up",
+      "customBlockState": "",
+      "command": "fill ~ ~ ~ ~ 30 ~ air"
+    }
+  ]
+}

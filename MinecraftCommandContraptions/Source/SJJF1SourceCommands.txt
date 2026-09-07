@@ -1,0 +1,58 @@
+fill ~-3 ~-1 ~ ~-1 ~8 ~ air
+fill ~3 ~-1 ~ ~1 ~8 ~ air
+fill ~10 ~6 ~ ~15 ~11 ~5 bedrock
+fill ~11 ~7 ~1 ~14 ~10 ~4 air
+fill ~10 ~7 ~1 ~10 ~10 ~4 glass
+fill ~15 ~7 ~1 ~15 ~10 ~4 glass
+fill ~11 ~7 ~ ~14 ~10 ~ glass
+fill ~11 ~7 ~5 ~14 ~10 ~5 glass
+fill ~11 ~11 ~1 ~14 ~11 ~4 glass
+fill ~11 ~6 ~1 ~14 ~6 ~4 glass
+setblock ~11 ~7 ~3 command_block{Command:'say 3'}
+setblock ~13 ~7 ~1 command_block[facing=south]{Command:'say 2'}
+setblock ~13 ~7 ~4 command_block[facing=east]{Command:'say 1'}
+setblock ~11 ~8 ~1 command_block{Command:'say Begin!'}
+setblock ~13 ~9 ~1 command_block[facing=east]{Command:'summon minecraft:spider ~ ~-8 ~ {Passengers:[{id:zombie,Passengers:[{id:skeleton}]}]}'}
+setblock ~14 ~9 ~1 chain_command_block[facing=up]{auto:1,Command:'summon minecraft:spider ~ ~-8 ~ {Passengers:[{id:zombie,Passengers:[{id:skeleton}]}]}'}
+setblock ~14 ~10 ~1 chain_command_block[facing=south]{auto:1,Command:'summon minecraft:spider ~ ~-8 ~ {Passengers:[{id:zombie,Passengers:[{id:skeleton}]}]}'}
+setblock ~14 ~10 ~2 chain_command_block[facing=south]{auto:1,Command:'summon minecraft:spider ~ ~-8 ~ {Passengers:[{id:zombie,Passengers:[{id:skeleton}]}]}'}
+setblock ~14 ~10 ~3 chain_command_block[facing=south]{auto:1,Command:'summon minecraft:spider ~ ~-8 ~ {Passengers:[{id:zombie,Passengers:[{id:skeleton}]}]}'}
+setblock ~14 ~10 ~4 chain_command_block[facing=west]{auto:1,Command:'summon minecraft:spider ~ ~-8 ~ {Passengers:[{id:zombie,Passengers:[{id:skeleton}]}]}'}
+setblock ~13 ~10 ~4 chain_command_block{auto:1,Command:'summon minecraft:spider ~ ~-8 ~ {Passengers:[{id:zombie,Passengers:[{id:skeleton}]}]}'}
+setblock ~13 ~10 ~3 chain_command_block{auto:1,Command:'summon minecraft:spider ~ ~-8 ~ {Passengers:[{id:zombie,Passengers:[{id:skeleton}]}]}'}
+setblock ~13 ~10 ~2 chain_command_block[facing=west]{auto:1,Command:'summon minecraft:spider ~ ~-8 ~ {Passengers:[{id:zombie,Passengers:[{id:skeleton}]}]}'}
+setblock ~12 ~10 ~2 chain_command_block[facing=south]{auto:1,Command:'summon minecraft:spider ~1 ~-9 ~1 {Passengers:[{id:zombie,Passengers:[{id:skeleton}]}]}'}
+setblock ~12 ~10 ~3 chain_command_block[facing=south]{auto:1,Command:'time set midnight'}
+setblock ~13 ~7 ~2 barrier
+setblock ~13 ~7 ~3 barrier
+setblock ~12 ~8 ~4 barrier
+setblock ~11 ~8 ~4 barrier
+setblock ~11 ~7 ~2 barrier
+setblock ~12 ~9 ~1 barrier
+setblock ~12 ~7 ~4 redstone_wire
+setblock ~12 ~7 ~1 redstone_wire
+setblock ~13 ~8 ~1 redstone_wire
+setblock ~13 ~8 ~4 redstone_wire
+setblock ~12 ~9 ~4 redstone_wire
+setblock ~11 ~9 ~4 redstone_wire
+setblock ~11 ~9 ~1 redstone_wire
+setblock ~13 ~10 ~1 redstone_wire
+setblock ~12 ~10 ~1 redstone_wire
+setblock ~12 ~7 ~3 repeater[facing=south,delay=4]
+setblock ~12 ~7 ~2 repeater[facing=south,delay=4]
+setblock ~13 ~8 ~2 repeater[delay=4]
+setblock ~13 ~8 ~3 repeater[delay=4]
+setblock ~11 ~8 ~3 repeater[facing=south,delay=4]
+setblock ~11 ~8 ~2 repeater[facing=south,delay=4]
+setblock ~11 ~-1 ~4 command_block[facing=up]{Command:'setblock ~ ~8 ~ redstone_block'}
+setblock ~11 ~ ~4 chain_command_block[facing=up]{Command:'setblock ~ ~7 ~ air'}
+setblock ~10 ~-1 ~4 pale_oak_button[facing=west]
+setblock ~10 ~ ~4 minecraft:pale_oak_wall_sign[facing=west]{front_text:{messages:['Press to','Begin Fight','','']}}
+setblock ~11 ~-1 ~1 command_block[facing=up]{Command:'fill ~-5 ~5 ~-5 ~5 ~15 ~5 air destroy'}
+setblock ~11 ~ ~1 chain_command_block[facing=up]{Command:'kill @e[type=item]'}
+setblock ~11 ~1 ~1 chain_command_block[facing=up]{auto:1,Command:'fill ~-1 ~-2 ~-3 ~-1 ~-1 ~3 stone replace'}
+setblock ~11 ~2 ~1 chain_command_block[facing=up]{auto:1,Command:'fill ~-3 ~-3 ~-3 ~3 ~1 ~3 air replace'}
+setblock ~10 ~-1 ~1 pale_oak_button[facing=west]
+setblock ~10 ~ ~1 minecraft:pale_oak_wall_sign[facing=west]{front_text:{messages:['Press to','Delete Mod','','']}}
+fill ~-5 ~-2 ~-5 ~5 ~-2 ~5 grass_block
+summon falling_block ~ ~-1 ~2 {BlockState:{Name:redstone_block},Passengers:[{id:falling_block,BlockState:{Name:activator_rail}},{id:command_block_minecart,Command:'setblock ~ ~-1 ~-1 repeating_command_block[facing=up]{auto:1,Command:\"kill @e[type=command_block_minecart]\"}'},{id:command_block_minecart,Command:'setblock ~ ~ ~-1 chain_command_block[facing=up]{auto:1,Command:\"\"}'},{id:command_block_minecart,Command:'setblock ~ ~1 ~-1 chain_command_block[facing=up]{auto:1,Command:\"fill ~-4 ~-3 ~-4 ~4 ~-3 ~4 grass_block\"}'},{id:command_block_minecart,Command:'setblock ~ ~2 ~-1 chain_command_block[facing=up]{auto:1,Command:\"kill @e[type=falling_block]\"}'},{id:command_block_minecart,Command:'setblock ~ ~3 ~-1 chain_command_block[facing=up]{auto:1,Command:\"fill ~-3 ~-4 ~-3 ~3 ~10 ~3 air\"}'}]}
