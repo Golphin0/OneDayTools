@@ -74,7 +74,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
 .tabs button { color: var(--muted); background: transparent; }
 .tabs button.active { color: var(--accent-ink); border-color: var(--accent); background: var(--accent); }
 
-#builder, #escape, #minecart {
+#builder, #escape, #minecart, #decompiler {
   padding: clamp(17px, 3vw, 27px);
   border: 1px solid var(--line);
   border-radius: 14px;
@@ -82,7 +82,7 @@ button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-
   box-shadow: var(--shadow);
 }
 
-#builder h3, #escape h3, #minecart h3 { margin-bottom: 20px; }
+#builder h3, #escape h3, #minecart h3, #decompiler h3 { margin-bottom: 20px; }
 
 .coordinates {
   display: grid;
@@ -194,6 +194,12 @@ hr {
 
 #escape > input { max-width: 180px; margin-bottom: 20px; }
 #escape > button, #minecart > button { margin-top: 14px; }
+#decompiler > button { margin-top: 14px; }
+#decompilerMode { max-width: 220px; margin-bottom: 14px; }
+#decompilerIn { min-height: 180px; }
+#decompilerOut { min-height: 290px; margin-top: 14px; }
+#minecartStateStatus { min-height: 1.5em; margin-top: 6px; color: var(--muted); }
+.minecart-options { display: grid; gap: 10px; margin: 14px 0; }
 
 @media (max-width: 760px) {
   .command-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -210,7 +216,7 @@ hr {
   .command-row { grid-template-columns: 1fr 1fr; }
   .command-row select:first-child { grid-column: 1 / -1; }
   .command-row .row-action { min-width: 0; }
-  #builder, #escape, #minecart { border-radius: 10px; }
+  #builder, #escape, #minecart, #decompiler { border-radius: 10px; }
 }
 
   </style>
@@ -222,6 +228,7 @@ hr {
     <button class="active" role="tab" aria-selected="true" aria-controls="builder" onclick="tab('builder', this)">Command Builder</button>
     <button role="tab" aria-selected="false" aria-controls="escape" onclick="tab('escape', this)">Quote Escaper</button>
     <button role="tab" aria-selected="false" aria-controls="minecart" onclick="tab('minecart', this)">Minecart Builder</button>
+    <button role="tab" aria-selected="false" aria-controls="decompiler" onclick="tab('decompiler', this)">Decompiler</button>
   </div>
 
   <div id="builder">
@@ -293,12 +300,55 @@ hr {
   <div id="minecart" hidden>
     <h3>Falling Redstone Activator Rail</h3>
 
+    <div class="coordinates">
+      <label class="coordinate">X: <input id="mineX" value="~" aria-label="Minecart summon X position" /></label>
+      <label class="coordinate">Y: <input id="mineY" value="~1" aria-label="Minecart summon Y position" /></label>
+      <label class="coordinate">Z: <input id="mineZ" value="~" aria-label="Minecart summon Z position" /></label>
+    </div>
+
+    <div class="minecart-options">
+      <label class="option-label">
+        <input id="mineRedstone" type="checkbox" checked />
+        Add redstone block
+      </label>
+      <label class="option-label">
+        <input id="mineActivator" type="checkbox" checked />
+        Add activator rail
+      </label>
+    </div>
+
     <textarea id="mineCommands" placeholder="say hello
 say world"></textarea>
 
     <button onclick="generateMinecart()">Generate</button>
 
     <textarea id="mineOut" aria-label="Generated minecart command output"></textarea>
+
+    <div class="state-actions" aria-label="Minecart builder state">
+      <button id="mineStateExport" onclick="exportMinecartState()">Copy State JSON</button>
+      <button id="mineStateImportButton" onclick="importMinecartState()">Paste State JSON</button>
+      <input id="mineStateImport" type="file" accept="application/json,.json" onchange="importMinecartState(event)" />
+      <label class="option-label state-mode">
+        <input id="mineStateDownloadMode" type="checkbox" onchange="updateMinecartStateMode()" />
+        Use download / file mode
+      </label>
+    </div>
+    <div id="minecartStateStatus" role="status" aria-live="polite"></div>
+  </div>
+
+  <div id="decompiler" hidden>
+    <h3>Command Decompiler</h3>
+
+    <select id="decompilerMode" aria-label="Command type">
+      <option value="falling_block">Falling Block</option>
+      <option value="minecart">Minecart</option>
+    </select>
+
+    <textarea id="decompilerIn" placeholder="Paste summon command here"></textarea>
+
+    <button onclick="decompile()">Decompile</button>
+
+    <textarea id="decompilerOut" aria-label="Decompiled JSON output" readonly></textarea>
   </div>
 
   <script type="module">
@@ -331,7 +381,7 @@ function deleteCommand(i) {
 }
 
 function tab(name, selectedButton) {
-  ["builder", "escape", "minecart"].forEach((id) => {
+  ["builder", "escape", "minecart", "decompiler"].forEach((id) => {
     document.getElementById(id).hidden = id !== name;
   });
 
@@ -342,14 +392,274 @@ function tab(name, selectedButton) {
   });
 }
 
+class SnbtParser {
+  constructor(text) {
+    this.text = text;
+    this.index = 0;
+  }
+
+  skipWhitespace() {
+    while (/\s/.test(this.text[this.index] || "")) this.index++;
+  }
+
+  parse() {
+    this.skipWhitespace();
+    const value = this.parseValue();
+    this.skipWhitespace();
+    if (this.index !== this.text.length) throw new Error("Unexpected text after NBT data");
+    return value;
+  }
+
+  parseValue() {
+    this.skipWhitespace();
+    const character = this.text[this.index];
+    if (character === "{") return this.parseCompound();
+    if (character === "[") return this.parseList();
+    if (character === '"' || character === "'") return this.parseQuoted();
+    return this.parseBare();
+  }
+
+  parseCompound() {
+    const result = {};
+    this.index++;
+    this.skipWhitespace();
+
+    while (this.index < this.text.length && this.text[this.index] !== "}") {
+      const key = this.parseKey();
+      this.skipWhitespace();
+      if (this.text[this.index] !== ":") throw new Error("Expected ':' in NBT compound");
+      this.index++;
+      result[key] = this.parseValue();
+      this.skipWhitespace();
+
+      if (this.text[this.index] === ",") {
+        this.index++;
+        this.skipWhitespace();
+      } else if (this.text[this.index] !== "}") {
+        throw new Error("Expected ',' or '}' in NBT compound");
+      }
+    }
+
+    if (this.text[this.index] !== "}") throw new Error("Unclosed NBT compound");
+    this.index++;
+    return result;
+  }
+
+  parseList() {
+    const result = [];
+    this.index++;
+    this.skipWhitespace();
+
+    while (this.index < this.text.length && this.text[this.index] !== "]") {
+      result.push(this.parseValue());
+      this.skipWhitespace();
+      if (this.text[this.index] === ",") {
+        this.index++;
+        this.skipWhitespace();
+      } else if (this.text[this.index] !== "]") {
+        throw new Error("Expected ',' or ']' in NBT list");
+      }
+    }
+
+    if (this.text[this.index] !== "]") throw new Error("Unclosed NBT list");
+    this.index++;
+    return result;
+  }
+
+  parseKey() {
+    this.skipWhitespace();
+    const character = this.text[this.index];
+    if (character === '"' || character === "'") return this.parseQuoted();
+
+    const start = this.index;
+    while (this.index < this.text.length && !/[\s:,{}\[\]]/.test(this.text[this.index])) this.index++;
+    const key = this.text.slice(start, this.index);
+    if (!key) throw new Error("Expected an NBT key");
+    return key;
+  }
+
+  parseQuoted() {
+    const quote = this.text[this.index++];
+    let result = "";
+
+    while (this.index < this.text.length) {
+      const character = this.text[this.index++];
+      if (character === quote) return result;
+      if (character === "\\" && this.index < this.text.length) {
+        result += this.text[this.index++];
+      } else {
+        result += character;
+      }
+    }
+
+    throw new Error("Unclosed quoted NBT value");
+  }
+
+  parseBare() {
+    const start = this.index;
+    while (this.index < this.text.length && !/[\s,\]}]/.test(this.text[this.index])) this.index++;
+    const value = this.text.slice(start, this.index);
+    if (!value) throw new Error("Expected an NBT value");
+    if (value === "true") return true;
+    if (value === "false") return false;
+    if (/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[bBsSlLfFdD])?$/.test(value)) {
+      return Number(value.replace(/[bBsSlLfFdD]$/, ""));
+    }
+    return value;
+  }
+}
+
+function parseSummonCommand(command) {
+  const dataStart = command.indexOf("{");
+  if (dataStart === -1) throw new Error("Could not find NBT data in the summon command");
+  const prefix = command.slice(0, dataStart).trim().split(/\s+/);
+  return {
+    entity: prefix[1] || "",
+    position: {
+      x: prefix[2] || "~",
+      y: prefix[3] || "~",
+      z: prefix[4] || "~",
+    },
+    data: new SnbtParser(command.slice(dataStart)).parse(),
+  };
+}
+
+function collectCommands(value, result = []) {
+  if (Array.isArray(value)) {
+    value.forEach((entry) => collectCommands(entry, result));
+  } else if (value && typeof value === "object") {
+    Object.entries(value).forEach(([key, entry]) => {
+      if (key === "Command" && typeof entry === "string") result.push(entry);
+      else collectCommands(entry, result);
+    });
+  }
+  return result;
+}
+
+function hasBlockName(value, blockName) {
+  if (Array.isArray(value)) return value.some((entry) => hasBlockName(entry, blockName));
+  if (!value || typeof value !== "object") return false;
+  if (value.BlockState && value.BlockState.Name === blockName) return true;
+  return Object.values(value).some((entry) => hasBlockName(entry, blockName));
+}
+
+function minecartStateFromCommand(summon) {
+  const commands = collectCommands(summon.data);
+  return {
+    version: 1,
+    type: "minecart",
+    meta: {
+      entity: summon.entity,
+      position: summon.position,
+      rootId: typeof summon.data.id === "string" ? summon.data.id : "",
+      commandCount: commands.length,
+      hasRedstoneBlock: hasBlockName(summon.data, "redstone_block"),
+      hasActivatorRail: hasBlockName(summon.data, "activator_rail"),
+    },
+    commands,
+  };
+}
+
+function nextFallingBlock(block, armourStands) {
+  const passengers = Array.isArray(block?.Passengers) ? block.Passengers : [];
+  let passenger = passengers[0];
+  if (passenger?.id === "armor_stand") {
+    armourStands.value = true;
+    passenger = Array.isArray(passenger.Passengers) ? passenger.Passengers[0] : null;
+  }
+  return passenger && passenger.id === "falling_block" ? passenger : null;
+}
+
+function blockType(blockName) {
+  const shortName = String(blockName || "").split(":").pop();
+  return {
+    command_block: "normal",
+    chain_command_block: "chain",
+    repeating_command_block: "repeat",
+    redstone_block: "redstone",
+  }[shortName] || "custom";
+}
+
+function decompileFallingBlockState(summon) {
+  const blocks = [];
+  const armourStands = { value: false };
+  let block = summon.data;
+  while (block) {
+    blocks.push(block);
+    block = nextFallingBlock(block, armourStands);
+  }
+
+  let executeAt = {
+    enabled: false,
+    x: "~",
+    y: "~",
+    z: "~",
+  };
+
+  const commands = blocks.map((entry) => {
+    const blockState = entry.BlockState || {};
+    const properties = blockState.Properties || {};
+    const tileEntityData = entry.TileEntityData || {};
+    const type = blockType(blockState.Name);
+    let command = typeof tileEntityData.Command === "string" ? tileEntityData.Command : "say hello";
+
+    const executeMatch = command.match(/^execute positioned (\S+) (\S+) (\S+) run (.*)$/);
+    if (executeMatch) {
+      if (!executeAt.enabled) {
+        executeAt = {
+          enabled: true,
+          x: executeMatch[1],
+          y: executeMatch[2],
+          z: executeMatch[3],
+        };
+      }
+      command = executeMatch[4];
+    }
+
+    return {
+      type,
+      auto: Boolean(tileEntityData.auto),
+      conditional: properties.conditional === true || properties.conditional === "true",
+      direction: typeof properties.facing === "string" ? properties.facing : "up",
+      customBlockState: type === "custom" ? String(blockState.Name || "") : "",
+      command,
+    };
+  });
+
+  return {
+    version: 1,
+    origin: summon.position,
+    executeAt,
+    armourStands: armourStands.value,
+    commands,
+  };
+}
+
+function decompile() {
+  const input = document.getElementById("decompilerIn").value.trim();
+  const output = document.getElementById("decompilerOut");
+
+  try {
+    const summon = parseSummonCommand(input);
+    const mode = document.getElementById("decompilerMode").value;
+    const result = mode === "minecart"
+      ? minecartStateFromCommand(summon)
+      : decompileFallingBlockState(summon);
+    output.value = JSON.stringify(result, null, 2);
+  } catch (error) {
+    output.value = `Error: ${error.message}`;
+  }
+}
+
 function generateMinecart() {
   const cmds = document.getElementById("mineCommands").value
     .split("\n")
     .filter((x) => x.trim() !== "");
 
-  const passengers = [
-    { id: "falling_block", BlockState: { Name: "activator_rail" } },
-  ];
+  const passengers = [];
+  if (document.getElementById("mineActivator").checked) {
+    passengers.push({ id: "falling_block", BlockState: { Name: "activator_rail" } });
+  }
 
   cmds.forEach((cmd) => {
     passengers.push({
@@ -360,11 +670,164 @@ function generateMinecart() {
 
   const redstone = {
     id: "falling_block",
-    BlockState: { Name: "redstone_block" },
-    Passengers: passengers,
   };
+  if (document.getElementById("mineRedstone").checked) {
+    redstone.BlockState = { Name: "redstone_block" };
+  }
+  redstone.Passengers = passengers;
 
-  document.getElementById("mineOut").value = `summon minecraft:falling_block ~ ~1 ~ ` + nbt(redstone);
+  const position = {
+    x: document.getElementById("mineX").value,
+    y: document.getElementById("mineY").value,
+    z: document.getElementById("mineZ").value,
+  };
+  document.getElementById("mineOut").value = `summon ${minecartMeta.entity} ${position.x} ${position.y} ${position.z} ` + nbt(redstone);
+}
+
+function defaultMinecartMeta() {
+  return {
+    entity: "minecraft:falling_block",
+    position: { x: "~", y: "~1", z: "~" },
+    rootId: "falling_block",
+    hasRedstoneBlock: true,
+    hasActivatorRail: true,
+  };
+}
+
+let minecartMeta = defaultMinecartMeta();
+
+function getMinecartCommands() {
+  return document.getElementById("mineCommands").value
+    .split("\n")
+    .map((command) => command.trim())
+    .filter((command) => command !== "");
+}
+
+function getMinecartState() {
+  const commands = getMinecartCommands();
+  const position = {
+    x: document.getElementById("mineX").value,
+    y: document.getElementById("mineY").value,
+    z: document.getElementById("mineZ").value,
+  };
+  minecartMeta = {
+    ...minecartMeta,
+    position,
+    hasRedstoneBlock: document.getElementById("mineRedstone").checked,
+    hasActivatorRail: document.getElementById("mineActivator").checked,
+  };
+  return {
+    version: 1,
+    type: "minecart",
+    meta: {
+      ...minecartMeta,
+      position: { ...minecartMeta.position },
+      commandCount: commands.length,
+    },
+    commands,
+  };
+}
+
+function setMinecartStateStatus(message) {
+  document.getElementById("minecartStateStatus").textContent = message;
+}
+
+function updateMinecartStateMode() {
+  const fileMode = document.getElementById("mineStateDownloadMode").checked;
+  document.getElementById("mineStateExport").textContent = fileMode
+    ? "Download State JSON"
+    : "Copy State JSON";
+  document.getElementById("mineStateImportButton").textContent = fileMode
+    ? "Import State JSON"
+    : "Paste State JSON";
+  setMinecartStateStatus("");
+}
+
+function downloadMinecartState(json) {
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "mcc-minecart-builder.json";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportMinecartState() {
+  const json = JSON.stringify(getMinecartState(), null, 2);
+  if (document.getElementById("mineStateDownloadMode").checked) {
+    downloadMinecartState(json);
+    setMinecartStateStatus("State downloaded.");
+    return;
+  }
+
+  if (navigator.clipboard && window.isSecureContext) {
+    navigator.clipboard.writeText(json)
+      .then(() => setMinecartStateStatus("State copied to clipboard."))
+      .catch(() => window.prompt("Copy this JSON:", json));
+    return;
+  }
+
+  window.prompt("Copy this JSON:", json);
+}
+
+function applyMinecartState(json) {
+  try {
+    const state = JSON.parse(json);
+    if (!state || typeof state !== "object" || !Array.isArray(state.commands) || (state.type && state.type !== "minecart")) {
+      throw new Error("Invalid minecart builder state");
+    }
+
+    document.getElementById("mineCommands").value = state.commands
+      .filter((command) => typeof command === "string")
+      .join("\n");
+
+    const meta = state.meta && typeof state.meta === "object" ? state.meta : {};
+    const position = meta.position && typeof meta.position === "object" ? meta.position : {};
+    minecartMeta = {
+      entity: typeof meta.entity === "string" ? meta.entity : "minecraft:falling_block",
+      position: {
+        x: typeof position.x === "string" ? position.x : "~",
+        y: typeof position.y === "string" ? position.y : "~1",
+        z: typeof position.z === "string" ? position.z : "~",
+      },
+      rootId: typeof meta.rootId === "string" ? meta.rootId : "falling_block",
+      hasRedstoneBlock: meta.hasRedstoneBlock !== false,
+      hasActivatorRail: meta.hasActivatorRail !== false,
+    };
+    document.getElementById("mineX").value = minecartMeta.position.x;
+    document.getElementById("mineY").value = minecartMeta.position.y;
+    document.getElementById("mineZ").value = minecartMeta.position.z;
+    document.getElementById("mineRedstone").checked = minecartMeta.hasRedstoneBlock;
+    document.getElementById("mineActivator").checked = minecartMeta.hasActivatorRail;
+    document.getElementById("mineOut").value = "";
+    setMinecartStateStatus("State imported.");
+  } catch (error) {
+    setMinecartStateStatus("Could not import state: choose a valid JSON file or paste valid JSON.");
+  }
+}
+
+function importMinecartState(event) {
+  if (event && event.target && event.target.files) {
+    const file = event.target.files[0];
+    event.target.value = "";
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => applyMinecartState(reader.result);
+    reader.readAsText(file);
+    return;
+  }
+
+  if (document.getElementById("mineStateDownloadMode").checked) {
+    document.getElementById("mineStateImport").click();
+    return;
+  }
+
+  const json = window.prompt("Paste minecart builder JSON:");
+  if (json !== null) applyMinecartState(json);
 }
 
 // COMMAND BUILDER
@@ -744,19 +1207,24 @@ function escapeText() {
 Object.assign(window, {
   add,
   allDirection,
+  decompile,
   escapeText,
   exportBuilderState,
+  exportMinecartState,
   generate,
   generateMinecart,
   importBuilderState,
+  importMinecartState,
   reverseCommands,
   tab,
   updateOptionState,
+  updateMinecartStateMode,
   updateStateMode,
 });
 
 updateOptionState();
 updateStateMode();
+updateMinecartStateMode();
 add();
 
   </script>
