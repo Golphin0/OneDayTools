@@ -133,6 +133,50 @@ hr {
 .option-group > input { max-width: 420px; }
 .execute-coordinates { margin-top: 1px; }
 
+.optimization-menu,
+.spacer-menu {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(10, 17, 12, .22);
+}
+
+.optimization-menu summary,
+.spacer-menu summary {
+  padding: 9px 11px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.optimization-menu summary::marker,
+.spacer-menu summary::marker { color: var(--accent); }
+
+.optimization-options {
+  display: grid;
+  gap: 9px;
+  padding: 0 11px 11px;
+}
+
+.spacer-menu {
+  margin-top: 2px;
+}
+
+.spacer-options {
+  display: grid;
+  gap: 9px;
+  padding: 0 11px 11px;
+}
+
+.spacer-custom-input {
+  width: min(100%, 420px);
+  margin-left: 26px;
+}
+
+.option-note {
+  margin-left: 26px;
+  color: var(--muted);
+  font-size: .9em;
+}
+
 .toolbar { margin-bottom: 24px; }
 
 .option-label {
@@ -251,6 +295,64 @@ hr {
           <label class="coordinate">Z: <input id="ez" value="~" aria-label="Execute Z position" disabled /></label>
         </div>
       </div>
+
+      <details class="optimization-menu">
+        <summary>Optimization options</summary>
+        <div class="optimization-options">
+          <label class="option-label">
+            <input id="plainByteValues" type="checkbox" />
+            1/0 instead of 1b/0b
+          </label>
+          <label class="option-label">
+            <input id="optimizeExecute" type="checkbox" />
+            Optimize execute
+          </label>
+          <label class="option-label">
+            <input id="bakePositioned" type="checkbox" />
+            EXPERIMENTAL: Bake positioned at
+          </label>
+        </div>
+      </details>
+
+      <label class="option-label">
+        <input id="armourStands" type="checkbox" checked onchange="updateOptimizationState()" />
+        Add armour stands between blocks
+      </label>
+
+      <details id="spacerOptions" class="spacer-menu">
+        <summary>Spacer options</summary>
+        <div class="spacer-options">
+          <label class="option-label">
+            <input id="armourStandSpacers" name="spacerType" type="radio" value="armor_stand" checked onchange="updateSpacerOptionsState()" />
+            Armour stand spacers
+          </label>
+          <label class="option-label">
+            <input id="pigSpacers" name="spacerType" type="radio" value="pig" onchange="updateSpacerOptionsState()" />
+            Pig spacers
+          </label>
+          <label class="option-label">
+            <input id="codSpacers" name="spacerType" type="radio" value="cod" onchange="updateSpacerOptionsState()" />
+            Cod spacers (NoAI recommended)
+          </label>
+          <label class="option-label">
+            <input id="catSpacers" name="spacerType" type="radio" value="cat" onchange="updateSpacerOptionsState()" />
+            Cat spacers
+          </label>
+          <label class="option-label">
+            <input id="customSpacer" name="spacerType" type="radio" value="custom" onchange="updateSpacerOptionsState()" />
+            Custom spacer ID
+          </label>
+          <input id="customSpacerId" class="spacer-custom-input" type="text" placeholder="minecraft:armor_stand" aria-label="Custom spacer ID" oninput="updateSpacerOptionsState()" hidden disabled />
+          <label class="option-label">
+            <input id="spacerNoAI" type="checkbox" onchange="updateSpacerOptionsState()" />
+            NoAI
+          </label>
+          <label class="option-label">
+            <input id="spacerInvisible" type="checkbox" checked />
+            Invisible
+          </label>
+        </div>
+      </details>
     </div>
 
     <hr />
@@ -262,11 +364,6 @@ hr {
       <button onclick="allDirection('down')">All Down</button>
       <button onclick="reverseCommands()">Reverse Order</button>
     </div>
-
-    <label class="option-label">
-      <input id="armourStands" type="checkbox" checked />
-      Add armour stands between blocks
-    </label>
 
     <div id="commands"></div>
 
@@ -953,6 +1050,24 @@ function updateOptionState() {
   });
 }
 
+function updateOptimizationState() {
+  updateSpacerOptionsState();
+}
+
+function updateSpacerOptionsState() {
+  const armourStands = document.getElementById("armourStands");
+  const spacerOptions = document.getElementById("spacerOptions");
+  const customSpacer = document.getElementById("customSpacer");
+  const customSpacerId = document.getElementById("customSpacerId");
+  const visible = armourStands.checked;
+  const customVisible = visible && customSpacer.checked;
+
+  spacerOptions.hidden = !visible;
+  if (!visible) spacerOptions.open = false;
+  customSpacerId.hidden = !customVisible;
+  customSpacerId.disabled = !customVisible;
+}
+
 function escapeNBT(s) {
   return s.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
 }
@@ -993,7 +1108,19 @@ function executePositionForBlock(index) {
   return `${x} ${y} ${z}`;
 }
 
-function makeBlock(c, executeAtEnabled, index) {
+function bakePositionedCoordinates(command, stackOffset) {
+  const number = "[+-]?(?:\\d+(?:\\.\\d*)?|\\.\\d+)";
+  const coordinates = new RegExp(`~(${number})?(\\s+)~(${number})?(\\s+)~(${number})?`, "g");
+  let changed = false;
+  const baked = command.replace(coordinates, (match, x, firstSpace, y, secondSpace, z) => {
+    changed = true;
+    const middle = relativeCoordinate(y === undefined ? "~" : `~${y}`, stackOffset);
+    return `~${x || ""}${firstSpace}${middle}${secondSpace}~${z || ""}`;
+  });
+  return { command: baked, changed };
+}
+
+function makeBlock(c, executeAtEnabled, index, optimizations) {
   const name = c.type === "custom"
     ? c.customBlockState.trim() || "command_block"
     : c.type === "redstone"
@@ -1008,9 +1135,18 @@ function makeBlock(c, executeAtEnabled, index) {
     return { id: "falling_block", BlockState: { Name: name } };
   }
 
-  const command = executeAtEnabled
-    ? `execute positioned ${executePositionForBlock(index)} run ${c.command}`
-    : c.command;
+  let command = c.command;
+  if (executeAtEnabled) {
+    const baked = optimizations.bakePositioned
+      ? bakePositionedCoordinates(command, -index)
+      : { command, changed: false };
+
+    if (baked.changed) {
+      command = baked.command;
+    } else if (!optimizations.optimizeExecute || command.includes("~")) {
+      command = `execute positioned ${executePositionForBlock(index)} run ${command}`;
+    }
+  }
 
   return {
     id: "falling_block",
@@ -1040,31 +1176,64 @@ function nbt(obj) {
   return obj;
 }
 
-function stackBlocks(blocks, useArmourStands) {
+function stackBlocks(blocks, spacerMode, optimizations) {
   let result = null;
   for (let i = blocks.length - 1; i >= 0; i--) {
     const block = blocks[i];
     if (result) {
-      block.Passengers = useArmourStands
-        ? [{ id: "armor_stand", Health: 0, Invisible: 1, Passengers: [result] }]
-        : [result];
+      if (spacerMode !== "none") {
+        const spacerId = spacerMode === "custom"
+          ? optimizations.customSpacerId.trim() || "armor_stand"
+          : spacerMode;
+        const spacer = { id: spacerId, Health: 0 };
+        if (optimizations.spacerNoAI) spacer.NoAI = nbtByte(1);
+        if (optimizations.spacerInvisible) spacer.Invisible = nbtByte(1);
+        spacer.Passengers = [result];
+        block.Passengers = [spacer];
+      } else {
+        block.Passengers = [result];
+      }
     }
     result = block;
   }
   return result;
 }
 
+function builderOptimizations() {
+  const selectedSpacer = document.querySelector('input[name="spacerType"]:checked');
+  return {
+    spacerType: selectedSpacer ? selectedSpacer.value : "armor_stand",
+    customSpacerId: document.getElementById("customSpacerId").value,
+    spacerNoAI: document.getElementById("spacerNoAI").checked,
+    spacerInvisible: document.getElementById("spacerInvisible").checked,
+    plainByteValues: document.getElementById("plainByteValues").checked,
+    optimizeExecute: document.getElementById("optimizeExecute").checked,
+    bakePositioned: document.getElementById("bakePositioned").checked,
+  };
+}
+
+function optimizeByteValues(output) {
+  return output.replace(/([01])b\b/g, "$1");
+}
+
 function generate() {
+  const optimizations = builderOptimizations();
   const useArmourStands = document.getElementById("armourStands").checked;
+  const spacerMode = !useArmourStands
+    ? "none"
+    : optimizations.spacerType;
   const executeAtEnabled = document.getElementById("executeAtEnabled").checked;
   const stack = stackBlocks(
-    commands.map((command, index) => makeBlock(command, executeAtEnabled, index)),
-    useArmourStands,
+    commands.map((command, index) => makeBlock(command, executeAtEnabled, index, optimizations)),
+    spacerMode,
+    optimizations,
   );
   const x = document.getElementById("ox").value;
   const y = document.getElementById("oy").value;
   const z = document.getElementById("oz").value;
-  document.getElementById("out").value = `summon minecraft:falling_block ${x} ${y} ${z} ` + nbt(stack);
+  let output = `summon minecraft:falling_block ${x} ${y} ${z} ` + nbt(stack);
+  if (optimizations.plainByteValues) output = optimizeByteValues(output);
+  document.getElementById("out").value = output;
 }
 
 function getBuilderState() {
@@ -1082,6 +1251,7 @@ function getBuilderState() {
       z: document.getElementById("ez").value,
     },
     armourStands: document.getElementById("armourStands").checked,
+    optimizations: builderOptimizations(),
     commands: commands.map((command) => ({ ...command })),
   };
 }
@@ -1164,9 +1334,33 @@ function applyBuilderState(json) {
     document.getElementById("ex").value = typeof executeAt.x === "string" ? executeAt.x : "~";
     document.getElementById("ey").value = typeof executeAt.y === "string" ? executeAt.y : "~";
     document.getElementById("ez").value = typeof executeAt.z === "string" ? executeAt.z : "~";
-    document.getElementById("armourStands").checked = state.armourStands !== false;
+    const optimizations = state.optimizations && typeof state.optimizations === "object"
+      ? state.optimizations
+      : {};
+    document.getElementById("armourStands").checked = typeof state.armourStands === "boolean"
+      ? state.armourStands
+      : optimizations.armourStands !== false;
+    const spacerType = ["armor_stand", "pig", "cod", "cat", "custom"].includes(optimizations.spacerType)
+      ? optimizations.spacerType
+      : optimizations.pigSpacers
+        ? "pig"
+        : "armor_stand";
+    document.querySelectorAll('input[name="spacerType"]').forEach((input) => {
+      input.checked = input.value === spacerType;
+    });
+    document.getElementById("customSpacerId").value = typeof optimizations.customSpacerId === "string"
+      ? optimizations.customSpacerId
+      : "";
+    document.getElementById("spacerNoAI").checked = Boolean(optimizations.spacerNoAI);
+    document.getElementById("spacerInvisible").checked = Object.prototype.hasOwnProperty.call(optimizations, "spacerInvisible")
+      ? Boolean(optimizations.spacerInvisible)
+      : !Boolean(optimizations.nonInvisibleArmourStands);
+    document.getElementById("plainByteValues").checked = Boolean(optimizations.plainByteValues);
+    document.getElementById("optimizeExecute").checked = Boolean(optimizations.optimizeExecute);
+    document.getElementById("bakePositioned").checked = Boolean(optimizations.bakePositioned);
     commands = importedCommands;
     updateOptionState();
+    updateOptimizationState();
     render();
     document.getElementById("out").value = "";
     setStateStatus("State imported.");
@@ -1218,11 +1412,14 @@ Object.assign(window, {
   reverseCommands,
   tab,
   updateOptionState,
+  updateOptimizationState,
+  updateSpacerOptionsState,
   updateMinecartStateMode,
   updateStateMode,
 });
 
 updateOptionState();
+updateOptimizationState();
 updateStateMode();
 updateMinecartStateMode();
 add();
