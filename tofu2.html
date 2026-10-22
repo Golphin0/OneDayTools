@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>tofu</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html, body {
+            margin: 0;
+        }
+        body {
+            background: black;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding:20px;
+            justify-content: center;
+            align-items: center;
+            color: white;
+        }
+        div {
+            display: flex;
+            flex-direction: column;
+            border: 1px solid white ;
+            padding: 20px;
+            border-radius: 6px;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        button {
+            background-color: #111111;
+            color: white;
+            border: 2px solid white;
+            width: 100%;
+            height: 30px;
+            border-radius: 6px;
+        }
+        .rowdiv {
+            flex-direction: row;
+        }
+        #preview {
+            width: 100%;
+        }
+        #historyDiv {
+            max-width: 85vw;
+            overflow-x: auto;
+            justify-content: flex-start;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+<h1>Tofu</h1>
+<div>
+    <div id="preview">
+    </div>
+    <div id="name"></div>
+    <div class="rowdiv" id="historyDiv">
+    </div>
+    <button id="down">Down</button>
+    <button id="up">Up</button>
+    <button id="clear">Clear</button>
+</div>
+<script>
+
+// window.onerror = function (message, source, lineno, colno, error) { alert(`An error occurred!\n\nError: ${message}\nFile: ${source}\nLine: ${lineno}`); return false; };
+
+let down = document.getElementById("down");
+let up = document.getElementById("up");
+let clear = document.getElementById("clear");
+let historyDiv = document.getElementById("historyDiv");
+let preview = document.getElementById("preview");
+let nameDiv = document.getElementById("name");
+let history = [];
+
+function render() {
+
+    // Steps
+
+    historyDiv.innerHTML = "";
+    history.forEach(element => {
+        let div = document.createElement("div");
+        let direction = Math.sign(element);
+        div.innerHTML = "x" + Math.abs(element) + ( direction == 1 ? " Up" : " Down" ) ;
+        historyDiv.appendChild(div);
+    });
+
+    // Visual
+
+    preview.innerHTML = "";
+    let cumulative = 0;
+    let highest = 0;
+    let lowest = 0;
+    history.forEach(element => {
+        cumulative += element;
+        highest = Math.max(highest, cumulative);
+        lowest = Math.min(lowest, cumulative);
+    });
+    let range = highest - lowest + 1;
+    let total = history.reduce((sum, element) => sum + Math.abs(element), 0) + 1;
+
+
+
+    let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", 200);
+    svg.setAttribute("height", 200);
+    svg.setAttribute("viewBox", "0 0 " + total*100 + " " + range*100);
+
+    let width = 10;
+    let height = svg.viewBox.baseVal.height + (lowest*100) - 10;
+    history.forEach( (element, index) => {
+
+        let tempwidth = width;
+        let tempheight = height;
+        for (let i=0; i <= Math.abs(element); i++) {
+            let circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", tempwidth);
+            circle.setAttribute("cy", tempheight);
+            circle.setAttribute("r", 10);
+            circle.setAttribute("fill", "#FFF");
+            svg.appendChild(circle);
+            tempwidth += 100;
+            tempheight -= Math.sign(element)*100;
+        }
+
+
+        let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+        line.setAttribute("x1", width);
+        line.setAttribute("y1", height);
+        width += Math.abs(element)*100;
+        height -= element*100;
+        line.setAttribute("x2", width);
+        line.setAttribute("y2", height);
+        line.setAttribute("stroke", "#FFF");
+        line.setAttribute("stroke-width", 2);
+        svg.appendChild(line);
+    });
+
+    preview.appendChild(svg);
+
+    // Name
+
+    let startings = [
+        "",
+        "d",
+        "t",
+        "th",
+        "f",
+        "fi",
+        "s",
+        "se",
+        "e",
+        "n"
+    ];
+
+    let name = "";
+    history.forEach((element, index) => {
+
+        let v = (index == 0 && Math.sign(element) == -1 ? "i" : "o");
+        let syl = startings[Math.abs(element)] + v;
+        name += syl;
+
+    });
+
+
+    name = name.charAt(0).toUpperCase() + name.slice(1);
+    nameDiv.innerHTML = name;
+
+}
+
+render();
+
+function newMove(dir) {
+    let currentLog = document.querySelector(".currentLog");
+    let currentDir = Math.sign(history.at(-1));
+    if (currentDir == dir) {
+        history[history.length - 1] += currentDir;
+    } else {
+        history.push(dir);
+    }
+    render();
+}
+
+down.addEventListener("click", () => newMove(-1));
+up.addEventListener("click", () => newMove(1));
+clear.addEventListener("click", () => {
+    history = [];
+    render();
+});
+</script>
+</body>
+</html>

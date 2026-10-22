@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShellNotify</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div>
+<h1 class="titleText">Title</h1>
+<textarea id="titleInput"></textarea>
+</div>
+<div>
+<h1 class="titleText">Text</h1>
+<textarea id="textInput"></textarea>
+</div>
+<div class="optionsDiv">
+<h1 class="titleText">Options</h1><p></p>
+
+<div class="optionRow"><p>In Shell</p><input type="checkbox" id="inShellCheck"></div>
+<div class="optionRow stylesOption" id="stylesOptionDiv"><div class="optionRow"><p>Styles</p><input type="checkbox" id="stylesCheckbox"></div>
+
+<div id="stylesOptions">
+  <div id="bigtextDiv" class="styleOptionComponent">
+    <p>Big Text</p>
+    <input type="checkbox" id="bigtextCheckbox">
+  </div>
+  <div id="bigpictureDiv" class="styleOptionComponent">
+    <p>Big Picture</p>
+    <input type="checkbox" id="bigpictureCheckbox">
+  </div>
+  <div id="inboxDiv" class="styleOptionComponent">
+    <p>Inbox</p>
+    <input type="checkbox" id="inboxCheckbox">
+  </div>
+  <div id="messagingDiv" class="styleOptionComponent">
+    <p>Messaging</p>
+    <input type="checkbox" id="messagingCheckbox">
+  </div>
+</div>
+
+</div>
+</div>
+<button id="createButton">Create</button>
+<textarea id="output"></textarea>
+<script src="script.js"></script>
+</body>
+</html>
